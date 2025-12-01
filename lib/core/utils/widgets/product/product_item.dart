@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:multi_vendor_e_commerce_app/core/utils/styles/app_styles.dart';
 import 'package:multi_vendor_e_commerce_app/core/utils/widgets/custom_button.dart';
+import 'package:multi_vendor_e_commerce_app/core/utils/widgets/product_details_screen.dart';
 import '../../../Features/cart/presentation/manger/cart_cubit/cart_cubit.dart';
 import '../../../generated/l10n.dart';
 import '../../models/product_model.dart';
@@ -36,7 +37,9 @@ class ProductItem extends StatelessWidget {
 
           child: InkWell(
             borderRadius: BorderRadius.circular(16),
-            onTap: () {},
+            onTap: () {
+               Navigator.push(context, MaterialPageRoute(builder: (context) => ProductDetailsScreen(product: product,),));
+            },
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -107,7 +110,7 @@ class ProductPrice extends StatelessWidget {
             fit: BoxFit.scaleDown,
             child: Text(
               product.quantity > 0
-                  ? '${product.price.toStringAsFixed(0)} LE'
+                  ? '${product.price.toStringAsFixed(0)} ${S.of(context).currency}'
                   : S.of(context).notAvailable,
               style: product.quantity > 0
                   ? AppStyles.semiBold18(
@@ -117,13 +120,13 @@ class ProductPrice extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
             ),
           ),
-          if (hasDiscount) const SizedBox(width: 8),
-          if (hasDiscount)
+          if (hasDiscount&&product.quantity>0) const SizedBox(width: 8),
+          if (hasDiscount&&product.quantity>0)
             FittedBox(
               fit: BoxFit.scaleDown,
 
               child: Text(
-                '${product.oldPrice!.toStringAsFixed(0)} LE',
+                '${product.oldPrice!.toStringAsFixed(0)} ${S.of(context).currency}',
                 style: AppStyles.regular16(context).copyWith(
                   color: Colors.grey,
                   decoration: TextDecoration.lineThrough,
@@ -289,7 +292,7 @@ class _ProductImageState extends State<ProductImage> {
             ),
           ),
           // ===== بانر الخصم =====
-          if (widget.product.price < widget.product.oldPrice!)
+          if (widget.product.price < widget.product.oldPrice!&&widget.product.quantity>0)
             Positioned(
               top: 8,
               left: 8,

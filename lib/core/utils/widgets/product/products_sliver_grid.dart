@@ -5,6 +5,8 @@ import 'package:multi_vendor_e_commerce_app/core/models/product_model.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import '../../../Features/home/data/repos/home_repo_impl.dart';
 import '../../../Features/home/presentation/manger/offer_cubit/offer_cubit.dart';
+import '../../../generated/l10n.dart';
+import '../styles/app_styles.dart';
 import 'product_item.dart';
 
 class ProductsSliverGrid extends StatelessWidget {
@@ -23,7 +25,10 @@ class ProductsSliverGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     return SliverPadding(
       padding: const EdgeInsets.all(12),
-      sliver: SliverGrid(
+      sliver: (products.isEmpty)?SliverToBoxAdapter(child: Center(child: Text(S.of(context).no_products_found
+,          style: AppStyles.semiBold16(context).copyWith(color: Colors.grey),
+
+      ),),):SliverGrid(
         delegate: SliverChildBuilderDelegate(
           (context, index) => Skeletonizer(
             enabled: isLoading,
