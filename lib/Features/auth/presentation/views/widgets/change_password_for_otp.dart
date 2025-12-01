@@ -6,6 +6,7 @@ import 'package:multi_vendor_e_commerce_app/core/utils/styles/app_styles.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:multi_vendor_e_commerce_app/generated/l10n.dart';
 import '../../../../../core/utils/api_services.dart';
+import '../../../../../core/utils/functions/encryption.dart';
 import '../../../../../core/utils/local_storage_helper.dart';
 
 class ChangePasswordForOtpScreen extends StatefulWidget {
@@ -48,9 +49,11 @@ class _ChangePasswordForOtpScreenState extends State<ChangePasswordForOtpScreen>
         final userId = Supabase.instance.client.auth.currentUser?.id;
 
         if (userId != null) {
+          final crypto = MySecureEncryption();
+          String hashedPassword=await crypto.encrypt(newPassword);
           await ApiServices().patchData(
             path: 'users?id=eq.$userId',
-            data: {"password": newPassword},
+            data: {"password": hashedPassword},
           );
         }
 
@@ -67,7 +70,7 @@ class _ChangePasswordForOtpScreenState extends State<ChangePasswordForOtpScreen>
           );
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => LoginView()),
+            MaterialPageRoute(builder: (context) => const LoginView()),
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(

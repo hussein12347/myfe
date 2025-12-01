@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:multi_vendor_e_commerce_app/core/utils/styles/app_styles.dart';
 import '../../../../../generated/l10n.dart';
 import '../../manger/notifications_cubit/notification_cubit.dart';
 import '../widget/notification_view_body.dart';
@@ -34,7 +33,7 @@ centerTitle: true,
             icon: const Icon(Icons.done_all, size: 16),
             label: Text(
               S.of(context).markAllAsRead,
-              style: TextStyle(fontSize: 9),
+              style: const TextStyle(fontSize: 9),
             ),
             style: TextButton.styleFrom(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),

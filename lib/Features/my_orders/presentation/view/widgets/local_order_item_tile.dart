@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -15,7 +16,7 @@ class LocalOrderItemTile extends StatelessWidget {
   final LocalOrderItem item;
   final int status;
 
-  const LocalOrderItemTile({required this.item, required this.status});
+  const LocalOrderItemTile({super.key, required this.item, required this.status});
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +30,7 @@ class LocalOrderItemTile extends StatelessWidget {
         color: Theme
             .of(context)
             .colorScheme
-            .surfaceVariant
+            .surfaceContainerHighest
             .withOpacity(0.3),
         borderRadius: BorderRadius.circular(16),
       ),
@@ -46,10 +47,10 @@ class LocalOrderItemTile extends StatelessWidget {
                   .colorScheme
                   .surface,
               child: product.productImages.isNotEmpty
-                  ? Image.network(
-                product.productImages[0].imageUrl!,
+                  ? CachedNetworkImage(
+                imageUrl:product.productImages[0].imageUrl,
                 fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) =>
+                errorWidget: (context, error, stackTrace) =>
                     _buildPlaceholder(),
               )
                   : _buildPlaceholder(),
@@ -100,7 +101,7 @@ class LocalOrderItemTile extends StatelessWidget {
             ),
           ),
           if  (status==1)
-            const Spacer(),
+            const SizedBox(width: 2,),
           if  (status==1)
 
             TextButton.icon(

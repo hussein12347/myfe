@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:multi_vendor_e_commerce_app/core/utils/styles/app_styles.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../../core/utils/api_services.dart';
+import 'package:multi_vendor_e_commerce_app/generated/l10n.dart';
 
-import '../../../core/api_services/api_services.dart';
+import '../../../../core/utils/functions/encryption.dart';
 
 class ChangePasswordScreen extends StatefulWidget {
   const ChangePasswordScreen({super.key});
@@ -40,24 +43,26 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
         final userId = Supabase.instance.client.auth.currentUser?.id;
 
         if (userId != null) {
+          final crypto = MySecureEncryption();
+          String hashedPassword=await crypto.encrypt(newPassword);
           await ApiServices().patchData(
             path: 'users?id=eq.$userId',
-            data: {"pass": newPassword},
+            data: {"password": hashedPassword},
           );
         }
 
         if (response.user != null) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('تم تغيير كلمة المرور بنجاح ✅'),
+            SnackBar(
+              content: Text(S.of(context).passwordChanged),
               backgroundColor: Colors.green,
             ),
           );
           Navigator.pop(context);
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('فشل في تغيير كلمة المرور ❌'),
+            SnackBar(
+              content: Text(S.of(context).passwordChangeFailed),
               backgroundColor: Colors.red,
             ),
           );
@@ -65,7 +70,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('حدث خطأ: $e'),
+            content: Text(S.of(context).errorOccurred(e.toString())),
             backgroundColor: Colors.red,
           ),
         );
@@ -85,10 +90,12 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       obscureText: !isPasswordVisible,
       decoration: InputDecoration(
         labelText: label,
+        labelStyle: AppStyles.semiBold18(context),
         border: const OutlineInputBorder(),
         suffixIcon: IconButton(
           icon: Icon(
             isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+            color: Theme.of(context).colorScheme.secondary,
           ),
           onPressed: () {
             setState(() {
@@ -100,10 +107,10 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       validator: validator ??
               (value) {
             if (value == null || value.isEmpty) {
-              return 'هذا الحقل مطلوب';
+              return S.of(context).requiredField;
             }
             if (value.length < 6) {
-              return 'كلمة المرور يجب أن تكون 6 أحرف على الأقل';
+              return S.of(context).passwordTooShort;
             }
             return null;
           },
@@ -114,7 +121,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('تغيير كلمة المرور'),
+        title: Text(S.of(context).changePassword),
         centerTitle: true,
       ),
       body: Padding(
@@ -123,18 +130,17 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
           key: _formKey,
           child: ListView(
             children: [
-              
               _buildPasswordField(
-                label: 'كلمة المرور الجديدة',
+                label: S.of(context).newPassword,
                 controller: newPasswordController,
               ),
               const SizedBox(height: 16),
               _buildPasswordField(
-                label: 'تأكيد كلمة المرور',
+                label: S.of(context).confirmPassword,
                 controller: confirmPasswordController,
                 validator: (value) {
                   if (value != newPasswordController.text) {
-                    return 'كلمة المرور غير متطابقة';
+                    return S.of(context).passwordsDoNotMatch;
                   }
                   return null;
                 },
@@ -144,8 +150,11 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                   ? const Center(child: CircularProgressIndicator())
                   : ElevatedButton.icon(
                 onPressed: updatePassword,
-                icon: const Icon(Icons.lock_reset),
-                label: const Text('حفظ التغييرات'),
+                icon: const Icon(Icons.lock_reset, color: Colors.white),
+                label: Text(
+                  S.of(context).saveChanges,
+                  style: AppStyles.semiBold18(context),
+                ),
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 14),
                 ),

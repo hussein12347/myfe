@@ -4,13 +4,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:multi_vendor_e_commerce_app/Features/home/data/models/store_category_model/sub_store_category.dart';
 import 'package:multi_vendor_e_commerce_app/Features/home/presentation/manger/product_cubit/product_cubit.dart';
-import 'package:multi_vendor_e_commerce_app/Features/home/presentation/manger/store_cubit/store_cubit.dart';
 import 'package:multi_vendor_e_commerce_app/Features/home/presentation/views/widgets/store_category/category_suggestions.dart';
 import 'package:multi_vendor_e_commerce_app/core/utils/functions/is_arabic.dart';
 import 'package:multi_vendor_e_commerce_app/core/utils/styles/app_styles.dart';
 import 'package:multi_vendor_e_commerce_app/core/utils/widgets/product/products_sliver_grid.dart';
 import 'package:multi_vendor_e_commerce_app/core/utils/widgets/products_screen.dart';
-import 'package:multi_vendor_e_commerce_app/core/utils/widgets/store_item.dart';
 import 'package:multi_vendor_e_commerce_app/generated/l10n.dart';
 import '../../../../../../core/models/product_model.dart';
 import '../../../../../../core/models/store_model.dart';
@@ -26,42 +24,48 @@ class SearchFilterCubit extends Cubit<SearchFilterState> {
   SearchFilterCubit() : super(SearchFilterState());
 
   void updateQuery(String query) {
-    print('Updating query: $query'); // Debug print
     emit(state.copyWith(query: query, isLoading: true));
     emit(state.copyWith(query: query, isLoading: false));
   }
 
   void updateSubCategory(String subCategoryId) {
-    print('Updating subCategoryId: $subCategoryId'); // Debug print
     emit(state.copyWith(subCategoryId: subCategoryId, isLoading: true));
     emit(state.copyWith(subCategoryId: subCategoryId, isLoading: false));
   }
 
-  List<ProductModel> filterProducts(String query, String subCategoryId, List<StoreModel> stories, List<ProductModel> products) {
+  List<ProductModel> filterProducts(
+      String query,
+      String subCategoryId,
+      List<StoreModel> stories,
+      List<ProductModel> products) {
     final lowerQuery = query.toLowerCase();
     final isArabic = LanguageHelper.isArabic();
 
-    // Filter stores by subCategoryId
-    final filteredStoreIds = subCategoryId == 'all'
-        ? stories.map((store) => store.id).toSet()
-        : stories.where((store) => store.storeSubCategoryId == subCategoryId).map((store) => store.id).toSet();
+    // نجهز قائمة بمعرفات المتاجر المتاحة فقط للتأكد من عدم عرض منتج لمتجر محذوف أو غير موجود
+    final validStoreIds = stories.map((e) => e.id).toSet();
 
-    print('Filtering products: query=$query, subCategoryId=$subCategoryId, storeCount=${filteredStoreIds.length}'); // Debug print
+    return products.where((product) {
+      // 1. التحقق من أن المنتج ينتمي لمتجر موجود في القائمة
+      if (!validStoreIds.contains(product.storeId)) {
+        return false;
+      }
 
-    // Filter products by store and query
-    final result = products.where((product) {
-      final isInCategory = filteredStoreIds.contains(product.storeId);
-      if (!isInCategory) return false;
+      // 2. فلترة المنتجات حسب الفئة الفرعية (subCategoryId)
+      // تأكد أن الاسم في موديل المنتج هو subCategoryId أو قم بتغييره هنا
+      if (subCategoryId != 'all' && product.sub_category_id != subCategoryId) {
+        return false;
+      }
 
-      if (query.isEmpty) return true;
+      // 3. فلترة البحث (Query)
+      if (query.isNotEmpty) {
+        final matchesName = isArabic
+            ? product.arabicName.toLowerCase().contains(lowerQuery)
+            : product.englishName.toLowerCase().contains(lowerQuery);
+        if (!matchesName) return false;
+      }
 
-      return isArabic
-          ? product.arabicName?.toLowerCase().contains(lowerQuery) ?? false
-          : product.englishName?.toLowerCase().contains(lowerQuery) ?? false;
+      return true;
     }).toList();
-
-    print('Filtered products count: ${result.length}'); // Debug print
-    return result;
   }
 }
 
@@ -70,9 +74,11 @@ class SearchFilterState {
   final String subCategoryId;
   final bool isLoading;
 
-  SearchFilterState({this.query = '', this.subCategoryId = 'all', this.isLoading = false});
+  SearchFilterState(
+      {this.query = '', this.subCategoryId = 'all', this.isLoading = false});
 
-  SearchFilterState copyWith({String? query, String? subCategoryId, bool? isLoading}) {
+  SearchFilterState copyWith(
+      {String? query, String? subCategoryId, bool? isLoading}) {
     return SearchFilterState(
       query: query ?? this.query,
       subCategoryId: subCategoryId ?? this.subCategoryId,
@@ -96,10 +102,12 @@ class StoriesScreenCategoriesBody extends StatefulWidget {
   });
 
   @override
-  State<StoriesScreenCategoriesBody> createState() => _StoriesScreenCategoriesBodyState();
+  State<StoriesScreenCategoriesBody> createState() =>
+      _StoriesScreenCategoriesBodyState();
 }
 
-class _StoriesScreenCategoriesBodyState extends State<StoriesScreenCategoriesBody> {
+class _StoriesScreenCategoriesBodyState
+    extends State<StoriesScreenCategoriesBody> {
   Timer? _debounce;
   late SearchFilterCubit _searchFilterCubit;
 
@@ -107,7 +115,6 @@ class _StoriesScreenCategoriesBodyState extends State<StoriesScreenCategoriesBod
   void initState() {
     super.initState();
     _searchFilterCubit = SearchFilterCubit();
-    // Initialize controller listener to sync with Cubit
     widget.controller.addListener(() {
       _onSearchChanged(widget.controller.text);
     });
@@ -122,8 +129,7 @@ class _StoriesScreenCategoriesBodyState extends State<StoriesScreenCategoriesBod
     widget.controller.removeListener(() {
       _onSearchChanged(widget.controller.text);
     });
-    widget.controller.dispose(); // Dispose controller
-    _searchFilterCubit.close(); // Close Cubit
+    _searchFilterCubit.close();
     super.dispose();
   }
 
@@ -132,7 +138,9 @@ class _StoriesScreenCategoriesBodyState extends State<StoriesScreenCategoriesBod
     final subCategories = widget.subStoreCategories.map((subCategory) {
       return Category(
         id: subCategory.id,
-        name: LanguageHelper.isArabic() ? subCategory.arabicName : subCategory.englishName,
+        name: LanguageHelper.isArabic()
+            ? subCategory.arabicName
+            : subCategory.englishName,
         imageUrl: subCategory.logoUrl,
       );
     }).toList();
@@ -154,13 +162,23 @@ class _StoriesScreenCategoriesBodyState extends State<StoriesScreenCategoriesBod
       child: BlocBuilder<SearchFilterCubit, SearchFilterState>(
         builder: (context, state) {
           final query = state.query.toLowerCase();
-          final filteredProducts = _searchFilterCubit.filterProducts(query, state.subCategoryId, widget.stories, products);
-          final filteredStoreIds = filteredProducts.map((product) => product.storeId).toSet();
-          final filteredOffers = context.read<OfferCubit>().offers.where((offer) {
-            return offer.offerProducts.any((offerProduct) => filteredStoreIds.contains(offerProduct.product.storeId));
-          }).toList();
 
-          print('Building UI with query: $query, subCategory: ${state.subCategoryId}, filteredProducts: ${filteredProducts.length}, isLoading: ${state.isLoading}'); // Debug print
+          // 1. نفلتر المنتجات أولاً
+          final filteredProducts = _searchFilterCubit.filterProducts(
+              query, state.subCategoryId, widget.stories, products);
+
+          // 2. نستخرج أرقام المتاجر من المنتجات المفلترة فقط
+          // هذا سيجعل قائمة المتاجر تظهر فقط المتاجر التي تبيع المنتجات المفلترة
+          final filteredStoreIds =
+          filteredProducts.map((product) => product.storeId).toSet();
+
+          final filteredOffers = context
+              .read<OfferCubit>()
+              .offers
+              .where((offer) {
+            return offer.offerProducts.any((offerProduct) =>
+                filteredStoreIds.contains(offerProduct.product.storeId));
+          }).toList();
 
           return Column(
             children: [
@@ -171,7 +189,6 @@ class _StoriesScreenCategoriesBodyState extends State<StoriesScreenCategoriesBod
                   controller: widget.controller,
                   prefixIcon: FontAwesomeIcons.search,
                   onSubmit: (value) {
-                    print('Search submitted: $value'); // Debug print
                     _searchFilterCubit.updateQuery(value);
                   },
                 ),
@@ -183,7 +200,7 @@ class _StoriesScreenCategoriesBodyState extends State<StoriesScreenCategoriesBod
                 },
               ),
               state.isLoading
-                  ?  Center(child: loadingWidget(context))
+                  ? Center(child: loadingWidget(context))
                   : filteredProducts.isEmpty
                   ? Center(child: Text(S.of(context).no_products_found))
                   : Expanded(
@@ -196,22 +213,31 @@ class _StoriesScreenCategoriesBodyState extends State<StoriesScreenCategoriesBod
                           padding: const EdgeInsets.all(16.0),
                           child: Text(
                             S.of(context).no_stores_found,
-                            style: AppStyles.semiBold16(context).copyWith(color: Colors.grey),
+                            style: AppStyles.semiBold16(context)
+                                .copyWith(color: Colors.grey),
                           ),
                         ),
                       )
-                          : Shops(stories: widget.stories.where((store) => filteredStoreIds.contains(store.id)).toList()),
+                          : Shops(
+                        // نعرض فقط المتاجر التي تحتوي على المنتجات المفلترة
+                          stories: widget.stories
+                              .where((store) => filteredStoreIds
+                              .contains(store.id))
+                              .toList()),
                     ),
                     const SliverToBoxAdapter(
                       child: Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 60.0),
+                        padding:
+                        EdgeInsets.symmetric(horizontal: 60.0),
                         child: Divider(),
                       ),
                     ),
-                    const SliverToBoxAdapter(child: SizedBox(height: 5)),
+                    const SliverToBoxAdapter(
+                        child: SizedBox(height: 5)),
                     SliverToBoxAdapter(
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16.0),
                         child: BestSellingHeader(
                           tittle: S.of(context).bestSeller,
                           onTap: () {
@@ -220,7 +246,8 @@ class _StoriesScreenCategoriesBodyState extends State<StoriesScreenCategoriesBod
                               MaterialPageRoute(
                                 builder: (context) => ProductsScreen(
                                   products: filteredProducts
-                                    ..sort((a, b) => b.boughtTimes!.compareTo(a.boughtTimes!)),
+                                    ..sort((a, b) => b.boughtTimes!
+                                        .compareTo(a.boughtTimes!)),
                                   title: widget.title,
                                 ),
                               ),
@@ -229,20 +256,24 @@ class _StoriesScreenCategoriesBodyState extends State<StoriesScreenCategoriesBod
                         ),
                       ),
                     ),
-                    const SliverToBoxAdapter(child: SizedBox(height: 10)),
+                    const SliverToBoxAdapter(
+                        child: SizedBox(height: 10)),
                     ProductsSliverGrid(
                       isHome: true,
                       products: filteredProducts
-                        ..sort((a, b) => b.boughtTimes!.compareTo(a.boughtTimes!)),
+                        ..sort((a, b) => b.boughtTimes!
+                            .compareTo(a.boughtTimes!)),
                     ),
                     if (filteredOffers.isNotEmpty)
                       SliverToBoxAdapter(
                         child: OffersBar(offers: filteredOffers),
                       ),
-                    const SliverToBoxAdapter(child: SizedBox(height: 5)),
+                    const SliverToBoxAdapter(
+                        child: SizedBox(height: 5)),
                     SliverToBoxAdapter(
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16.0),
                         child: BestSellingHeader(
                           tittle: S.of(context).latest,
                           onTap: () {
@@ -251,7 +282,8 @@ class _StoriesScreenCategoriesBodyState extends State<StoriesScreenCategoriesBod
                               MaterialPageRoute(
                                 builder: (context) => ProductsScreen(
                                   products: filteredProducts
-                                    ..sort((a, b) => b.createdAt!.compareTo(a.createdAt!)),
+                                    ..sort((a, b) => b.createdAt
+                                        .compareTo(a.createdAt)),
                                   title: widget.title,
                                 ),
                               ),
@@ -260,11 +292,13 @@ class _StoriesScreenCategoriesBodyState extends State<StoriesScreenCategoriesBod
                         ),
                       ),
                     ),
-                    const SliverToBoxAdapter(child: SizedBox(height: 10)),
+                    const SliverToBoxAdapter(
+                        child: SizedBox(height: 10)),
                     ProductsSliverGrid(
                       isHome: true,
                       products: filteredProducts
-                        ..sort((a, b) => b.createdAt!.compareTo(a.createdAt!)),
+                        ..sort((a, b) =>
+                            b.createdAt.compareTo(a.createdAt)),
                     ),
                   ],
                 ),

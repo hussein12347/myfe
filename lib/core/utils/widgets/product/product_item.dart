@@ -1,23 +1,27 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:multi_vendor_e_commerce_app/core/utils/styles/app_styles.dart';
 import 'package:multi_vendor_e_commerce_app/core/utils/widgets/custom_button.dart';
-import 'package:multi_vendor_e_commerce_app/core/utils/widgets/product_details_screen.dart';
-import '../../../Features/cart/presentation/manger/cart_cubit/cart_cubit.dart';
-import '../../../generated/l10n.dart';
-import '../../models/product_model.dart';
-import '../functions/is_arabic.dart';
+import 'package:multi_vendor_e_commerce_app/core/utils/widgets/product/product_details_screen.dart';
+import 'package:multi_vendor_e_commerce_app/core/utils/widgets/product/product_reviews_screen.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../../generated/l10n.dart';
+import '../../../models/product_model.dart';
+import '../../functions/is_arabic.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 
+import '../../functions/show_message.dart';
 
 class ProductItem extends StatelessWidget {
   final ProductModel product;
   final Future<void> Function() favoriteOnPressed;
-
+  final Future<void> Function() addToCartOnPressed;
+final bool isLocalPaid;
   const ProductItem({
     super.key,
     required this.product,
-    required this.favoriteOnPressed,
+    required this.favoriteOnPressed, required this.addToCartOnPressed, required this.isLocalPaid,
   });
 
   @override
@@ -34,53 +38,104 @@ class ProductItem extends StatelessWidget {
           ),
           elevation: 6,
           shadowColor: Colors.black.withOpacity(0.08),
-
           child: InkWell(
             borderRadius: BorderRadius.circular(16),
             onTap: () {
-               Navigator.push(context, MaterialPageRoute(builder: (context) => ProductDetailsScreen(product: product,),));
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ProductDetailsScreen(
+                    product: product,
+                    onTap: () {
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => ProductReviewsScreen(product: product),));
+
+                    },
+                  ),
+                ),
+              );
             },
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                // ===== صورة المنتج مع Stack =====
+                // Product image with carousel
                 Expanded(
                   child: ProductImage(
                     product: product,
                     isDark: isDark,
                     theme: theme,
                     maxHeight: constraints.maxHeight * 0.55,
-                    favoriteOnPressed:
-                        favoriteOnPressed, // تخصيص الارتفاع بناءً على القيود
+                    favoriteOnPressed: favoriteOnPressed,
                   ),
                 ),
-
-                // ===== السعر =====
-                const   SizedBox(height: 10,),
+                // Price
+                const SizedBox(height: 10),
                 ProductPrice(product: product, theme: theme),
-
-                // ===== اسم المنتج =====
-                     const  SizedBox(height: 5,),
+                // Product name
+                const SizedBox(height: 5),
                 ProductName(product: product),
-
-                // ===== التقييم والعلامة التجارية =====
-                     const  SizedBox(height: 5,),
-                ProductRate(isDark: isDark, theme: theme, rate: product.averageRate.toString(), storeName: (LanguageHelper.isArabic())?product.store.arabic_name:product.store.english_name,),
-
-                // ===== زر الإضافة =====
-                     const  SizedBox(height: 5,),
+                // Rating and store name
+                const SizedBox(height: 5),
+                ProductRate(
+                  isDark: isDark,
+                  theme: theme,
+                  rate: product.averageRate.toString(),
+                  storeName: LanguageHelper.isArabic()
+                      ? product.store.arabic_name
+                      : product.store.english_name,
+                ),
+                // Flash deal timer or "Offer Ended" message
+                if (product.isFlash && product.flashEndTime != null)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    child: FlashTimer(
+                      flashEndTime: product.flashEndTime!,
+                      theme: theme,
+                    ),
+                  ),
+                // Add to cart button
+                const SizedBox(height: 5),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: CustomButton(
-                    backgroundColor: (product.quantity > 0)?null:Colors.redAccent,
+                    backgroundColor:
+                        (product.quantity > 0 &&
+                            (!product.isFlash ||
+                                (product.flashEndTime != null &&
+                                    product.flashEndTime!.isAfter(
+                                      DateTime.now(),
+                                    ))))
+                        ? null
+                        : Colors.redAccent,
                     height: 36,
-                    onPressed: () {
-                      if (product.quantity > 0) {
-  context.read<CartCubit>().addItem(product,context);
-}
+                    onPressed:
+
+
+                        () {
+
+
+
+                      if (product.quantity > 0 &&
+                          (!product.isFlash ||
+                              (product.flashEndTime != null &&
+                                  product.flashEndTime!.isAfter(
+                                    DateTime.now(),
+                                  )))) {
+                        addToCartOnPressed();
+                      }
                     },
-                    text: (product.quantity > 0)? S.of(context).add:S.of(context).notAvailable,
+                    text:
+                        (product.quantity > 0 &&
+                            (!product.isFlash ||
+                                (product.flashEndTime != null &&
+                                    product.flashEndTime!.isAfter(
+                                      DateTime.now(),
+                                    ))))
+                        ? (isLocalPaid?S.of(context).addToLocalCart:S.of(context).add)
+                        : S.of(context).notAvailable,
                   ),
                 ),
               ],
@@ -88,6 +143,78 @@ class ProductItem extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+class FlashTimer extends StatefulWidget {
+  final DateTime flashEndTime;
+  final ThemeData theme;
+
+  const FlashTimer({
+    super.key,
+    required this.flashEndTime,
+    required this.theme,
+  });
+
+  @override
+  State<FlashTimer> createState() => _FlashTimerState();
+}
+
+class _FlashTimerState extends State<FlashTimer> {
+  late Duration remainingTime;
+  late bool isExpired;
+
+  @override
+  void initState() {
+    super.initState();
+    updateRemainingTime();
+    // Update timer every second
+    Future.doWhile(() async {
+      await Future.delayed(const Duration(seconds: 1));
+      if (mounted) {
+        setState(() {
+          updateRemainingTime();
+        });
+        return true;
+      }
+      return false;
+    });
+  }
+
+  void updateRemainingTime() {
+    final now = DateTime.now();
+    remainingTime = widget.flashEndTime.difference(now);
+    isExpired = remainingTime.isNegative || remainingTime.inSeconds == 0;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (isExpired) {
+      return Text(
+        S.of(context).offerEnded,
+        style: AppStyles.semiBold14(context).copyWith(color: Colors.red),
+        textAlign: TextAlign.center,
+      );
+    }
+
+    final hours = remainingTime.inHours;
+    final minutes = remainingTime.inMinutes.remainder(60);
+    final seconds = remainingTime.inSeconds.remainder(60);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: widget.theme.colorScheme.primary.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Text(
+        '${S.of(context).timeLeft}: ${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}',
+        style: AppStyles.semiBold14(
+          context,
+        ).copyWith(color: widget.theme.colorScheme.primary),
+        textAlign: TextAlign.center,
+      ),
     );
   }
 }
@@ -100,7 +227,8 @@ class ProductPrice extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hasDiscount = product.oldPrice! > product.price;
+    final hasDiscount =
+        product.oldPrice != null && product.oldPrice! > product.price;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -109,10 +237,17 @@ class ProductPrice extends StatelessWidget {
           FittedBox(
             fit: BoxFit.scaleDown,
             child: Text(
-              product.quantity > 0
+              product.quantity > 0 &&
+                      (!product.isFlash ||
+                          (product.flashEndTime != null &&
+                              product.flashEndTime!.isAfter(DateTime.now())))
                   ? '${product.price.toStringAsFixed(0)} ${S.of(context).currency}'
                   : S.of(context).notAvailable,
-              style: product.quantity > 0
+              style:
+                  product.quantity > 0 &&
+                      (!product.isFlash ||
+                          (product.flashEndTime != null &&
+                              product.flashEndTime!.isAfter(DateTime.now())))
                   ? AppStyles.semiBold18(
                       context,
                     ).copyWith(color: theme.colorScheme.secondary)
@@ -120,11 +255,19 @@ class ProductPrice extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
             ),
           ),
-          if (hasDiscount&&product.quantity>0) const SizedBox(width: 8),
-          if (hasDiscount&&product.quantity>0)
+          if (hasDiscount &&
+              product.quantity > 0 &&
+              (!product.isFlash ||
+                  (product.flashEndTime != null &&
+                      product.flashEndTime!.isAfter(DateTime.now()))))
+            const SizedBox(width: 8),
+          if (hasDiscount &&
+              product.quantity > 0 &&
+              (!product.isFlash ||
+                  (product.flashEndTime != null &&
+                      product.flashEndTime!.isAfter(DateTime.now()))))
             FittedBox(
               fit: BoxFit.scaleDown,
-
               child: Text(
                 '${product.oldPrice!.toStringAsFixed(0)} ${S.of(context).currency}',
                 style: AppStyles.regular16(context).copyWith(
@@ -151,7 +294,6 @@ class ProductName extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       child: FittedBox(
         fit: BoxFit.scaleDown,
-
         child: Text(
           LanguageHelper.isArabic() ? product.arabicName : product.englishName,
           maxLines: 1,
@@ -164,7 +306,13 @@ class ProductName extends StatelessWidget {
 }
 
 class ProductRate extends StatelessWidget {
-  const ProductRate({super.key, required this.isDark, required this.theme, required this.rate, required this.storeName});
+  const ProductRate({
+    super.key,
+    required this.isDark,
+    required this.theme,
+    required this.rate,
+    required this.storeName,
+  });
 
   final bool isDark;
   final String rate;
@@ -202,7 +350,7 @@ class ProductRate extends StatelessWidget {
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-             storeName ,
+              storeName,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
@@ -239,68 +387,122 @@ class ProductImage extends StatefulWidget {
 }
 
 class _ProductImageState extends State<ProductImage> {
-  bool isLoading = false; // متغير الحالة
+  bool isLoading = false;
+  int _currentImageIndex = 0;
+
   @override
   Widget build(BuildContext context) {
+    // Collect valid image URLs, falling back to product.imageUrl if productImages is empty or invalid
+    final imageUrls = widget.product.productImages
+        .where((img) => img.imageUrl.isNotEmpty)
+        .map((img) => img.imageUrl)
+        .toList();
+
+
     return ClipRRect(
       borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
       child: Stack(
         children: [
-          Container(
-            constraints:   const BoxConstraints(
-              minHeight: 100,
-        
-            ),
-            width: double.infinity,
-            height: double.infinity,
-            child: FittedBox(
-              fit: BoxFit.cover,
-              child: Image.network(
-                widget.product.imageUrl!,
-                fit: BoxFit.cover,
-                loadingBuilder: (context, child, progress) {
-                  return progress == null
-                      ? child
-                      : Container(
-                          height: widget.maxHeight,
-                          color: widget.isDark
-                              ? Colors.grey[800]
-                              : Colors.grey[100],
-                          child:  Padding(
-                            padding: const EdgeInsets.all(32.0),
-                            child: Center(
-                              child: LoadingAnimationWidget.inkDrop(
-                                color:Theme.of(context).colorScheme.secondary,
-                                size: 25,
-                              )
-                            ),
+          // Carousel for product images
+          imageUrls.isNotEmpty
+              ? CarouselSlider(
+                  options: CarouselOptions(
+                    height: widget.maxHeight,
+                    viewportFraction: 1.0,
+                    enlargeCenterPage: false,
+                    enableInfiniteScroll: imageUrls.length > 1,
+                    onPageChanged: (index, reason) {
+                      setState(() {
+                        _currentImageIndex = index;
+                      });
+                    },
+                  ),
+                  items: imageUrls.map((imageUrl) {
+                    return CachedNetworkImage(
+                      imageUrl: imageUrl,
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                      height: widget.maxHeight,
+                      placeholder: (context, url) => Container(
+                        height: widget.maxHeight,
+                        color: widget.isDark
+                            ? Colors.grey[800]
+                            : Colors.grey[100],
+                        child: Center(
+                          child: LoadingAnimationWidget.inkDrop(
+                            color: widget.theme.colorScheme.secondary,
+                            size: 25,
                           ),
-                        );
-                },
-                errorBuilder: (context, error, stackTrace) => Container(
+                        ),
+                      ),
+                      errorWidget: (context, url, error) => Container(
+                        height: widget.maxHeight,
+                        color: widget.isDark
+                            ? Colors.grey[800]
+                            : Colors.grey[200],
+                        child: const Center(
+                          child: Icon(
+                            Icons.broken_image,
+                            size: 40,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                )
+              : Container(
                   height: widget.maxHeight,
                   color: widget.isDark ? Colors.grey[800] : Colors.grey[200],
                   child: const Center(
                     child: Icon(
-                      Icons.broken_image,
+                      Icons.image_not_supported,
                       size: 40,
                       color: Colors.grey,
                     ),
                   ),
                 ),
+          // Image indicator dots
+          if (imageUrls.length > 1)
+            Positioned(
+              bottom: 10,
+              left: 0,
+              right: 0,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: imageUrls.asMap().entries.map((entry) {
+                  return Container(
+                    width: _currentImageIndex == entry.key ? 10.0 : 6.0,
+                    height: 6.0,
+                    margin: const EdgeInsets.symmetric(horizontal: 3.0),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: _currentImageIndex == entry.key
+                          ? Colors.white
+                          : Colors.white.withOpacity(0.4),
+                    ),
+                  );
+                }).toList(),
               ),
             ),
-          ),
-          // ===== بانر الخصم =====
-          if (widget.product.price < widget.product.oldPrice!&&widget.product.quantity>0)
+          // Discount banner
+          if (widget.product.price <
+                  (widget.product.oldPrice ?? double.infinity) &&
+              widget.product.quantity > 0 &&
+              (!widget.product.isFlash ||
+                  (widget.product.flashEndTime != null &&
+                      widget.product.flashEndTime!.isAfter(DateTime.now()))))
             Positioned(
               top: 8,
               left: 8,
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF3A7BD5), Color(0xFF00D2FF)],
+                  gradient: LinearGradient(
+                    colors: [
+                      darken(widget.theme.colorScheme.primary, 0.18),
+                      widget.theme.colorScheme.secondary,
+                    ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -321,7 +523,7 @@ class _ProductImageState extends State<ProductImage> {
                 ),
               ),
             ),
-          // ===== أيقونة القلب =====
+          // Favorite icon
           Positioned(
             top: 5,
             right: 5,
@@ -356,20 +558,20 @@ class _ProductImageState extends State<ProductImage> {
                                   ? Colors.white70
                                   : Colors.black54,
                             )
-                          : const   Icon(
+                          : const Icon(
                               Icons.favorite,
                               size: 18,
                               color: Colors.redAccent,
                             ),
                       onPressed: () async {
-                        if (isLoading==false) {
-                          setState(() => isLoading = true); // إظهار اللودينج
-                          {
-                            await widget.favoriteOnPressed(); // تنفيذ الفانكشن
+                        if (!isLoading) {
+                          setState(() => isLoading = true);
+                          try {
+                            await widget.favoriteOnPressed();
+                          } finally {
+                            setState(() => isLoading = false);
                           }
-                          setState(() => isLoading = false); 
                         }
-// إخفاء اللودينج
                       },
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(),
@@ -379,5 +581,11 @@ class _ProductImageState extends State<ProductImage> {
         ],
       ),
     );
+  }
+
+  Color darken(Color color, [double amount = .1]) {
+    final hsl = HSLColor.fromColor(color);
+    final hslDark = hsl.withLightness((hsl.lightness - amount).clamp(0.0, 1.0));
+    return hslDark.toColor();
   }
 }

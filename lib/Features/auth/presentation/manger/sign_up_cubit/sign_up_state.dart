@@ -14,3 +14,12 @@ final class SignUpSuccess extends SignUpState {
   final UserModel user;
   SignUpSuccess(this.user);
 }
+final class GetCompaniesSuccess extends SignUpState {
+  final List<CompanyModel> companies;
+  GetCompaniesSuccess(this.companies);
+}
+
+final class GetCompaniesError extends SignUpState {
+  final String errorMessage;
+  GetCompaniesError(this.errorMessage);
+}

@@ -6,8 +6,6 @@ import 'package:multi_vendor_e_commerce_app/Features/my_orders/data/repos/my_ord
 import 'package:multi_vendor_e_commerce_app/core/utils/functions/show_message.dart';
 
 import '../../../../../core/models/local_order_model.dart';
-import '../../../../../core/models/order_model.dart';
-import '../../../../../generated/l10n.dart';
 
 part 'local_order_state.dart';
 

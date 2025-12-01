@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import 'package:multi_vendor_e_commerce_app/Features/my_orders/presentation/manger/order_cubit/order_cubit.dart';
 import 'package:multi_vendor_e_commerce_app/Features/my_orders/presentation/view/widgets/status_config.dart';
-import 'package:multi_vendor_e_commerce_app/core/models/order_model.dart';
 import 'package:multi_vendor_e_commerce_app/core/utils/functions/is_arabic.dart';
 import 'package:multi_vendor_e_commerce_app/core/utils/styles/app_styles.dart';
 import 'package:multi_vendor_e_commerce_app/core/utils/widgets/custom_button.dart';
@@ -12,12 +10,11 @@ import '../../../../../core/models/local_order_model.dart';
 import '../../../../../generated/l10n.dart';
 import '../../manger/local_order_cubit/local_order_cubit.dart';
 import 'local_order_item_tile.dart';
-import 'order_item_tile.dart';
 
 class LocalOrderCard extends StatefulWidget {
   final LocalOrderModel order;
 
-  const LocalOrderCard({required this.order});
+  const LocalOrderCard({super.key, required this.order});
 
   @override
   State<LocalOrderCard> createState() => LocalOrderCardState();
@@ -161,7 +158,7 @@ class LocalOrderCardState extends State<LocalOrderCard> {
                       item: item,
                       status: widget.order.status,
                     ))
-                        .toList(),
+                        ,
                     const SizedBox(height: 16),
                     // Action buttons
                     if (widget.order.status == 0) // Show cancel button only for pending
@@ -198,7 +195,7 @@ class LocalOrderCardState extends State<LocalOrderCard> {
             Container(
               height: 6,
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceVariant,
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(3),
               ),
               width: totalWidth,
@@ -243,7 +240,7 @@ class LocalOrderCardState extends State<LocalOrderCard> {
             color: isActive ? _getStatusColor(step) : Theme.of(context).cardColor,
             border: isCurrent
                 ? Border.all(
-              color: Theme.of(context).colorScheme.background,
+              color: Theme.of(context).colorScheme.surface,
               width: 3,
             )
                 : null,
@@ -319,7 +316,7 @@ class LocalOrderCardState extends State<LocalOrderCard> {
           text: S.of(context).unknown,
           icon: Icons.help,
           textColor: Theme.of(context).textTheme.bodyLarge!.color!,
-          backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
+          backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
         );
     }
   }

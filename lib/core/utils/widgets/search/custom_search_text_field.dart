@@ -41,7 +41,7 @@ class CustomSearchTextField extends StatelessWidget {
         decoration: InputDecoration(
           hintText: hintText,
           prefixIcon: Padding(
-            padding: EdgeInsets.all(12),
+            padding: const EdgeInsets.all(12),
             child: Icon(FontAwesomeIcons.search,color: Theme.of(context).colorScheme.secondary,),
           ),
           suffixIcon: (filterOnPressed != null && orderOnPressed != null)
@@ -68,12 +68,12 @@ class CustomSearchTextField extends StatelessWidget {
               : null,
           filled: true,
           fillColor: Theme.of(context).brightness==Brightness.light?Colors.white:null,
-          hintStyle: TextStyle(
+          hintStyle: const TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w400,
-            color: const Color(0xff949D9E),
+            color: Color(0xff949D9E),
           ),
-          contentPadding: EdgeInsets.symmetric(
+          contentPadding: const EdgeInsets.symmetric(
             horizontal: 12,
             vertical: 14,
           ),

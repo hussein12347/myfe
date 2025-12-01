@@ -11,20 +11,20 @@ import '../../../../../core/models/order_model.dart';
 import 'my_order_repo.dart';
 
 class MyOrderRepoImpl implements MyOrderRepo {
-  ApiServices _api = ApiServices();
+  final ApiServices _api = ApiServices();
 
   @override
   Future<Either<Failure, bool>> cancelOrder(String id) async {
     try {
 
     Response response = await _api.getData(
-      path: 'orders?id=eq.${id}',
+      path: 'orders?id=eq.$id',
 
     );
 
     if (response.data[0]['status'] == 0) {
       await _api.patchData(
-        path: 'orders?id=eq.${id}',
+        path: 'orders?id=eq.$id',
         data: {"status": 3},
       );
       return right(true);
@@ -63,13 +63,13 @@ class MyOrderRepoImpl implements MyOrderRepo {
     try {
 
     Response response = await _api.getData(
-      path: 'local_orders?id=eq.${id}',
+      path: 'local_orders?id=eq.$id',
 
     );
 
     if (response.data[0]['status'] == 0) {
       await _api.patchData(
-        path: 'local_orders?id=eq.${id}',
+        path: 'local_orders?id=eq.$id',
         data: {"status": 2},
       );
       return right(true);

@@ -1,10 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:multi_vendor_e_commerce_app/Features/home/presentation/views/widgets/store_category/store_category_item.dart';
-import 'package:multi_vendor_e_commerce_app/core/models/category_model.dart';
-import 'package:multi_vendor_e_commerce_app/core/models/store_model.dart';
-import 'package:multi_vendor_e_commerce_app/core/utils/widgets/category_item.dart';
-import 'package:multi_vendor_e_commerce_app/core/utils/widgets/store_item.dart';
 
 import '../../../../data/models/store_category_model/store_category_model.dart';
 

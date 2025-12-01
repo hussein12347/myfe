@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
-import 'package:multi_vendor_e_commerce_app/Features/home/presentation/views/home_view.dart';
 import 'package:multi_vendor_e_commerce_app/Features/home/presentation/views/widgets/nav_bar.dart';
 import 'package:multi_vendor_e_commerce_app/generated/assets.dart';
+import 'package:multi_vendor_e_commerce_app/generated/l10n.dart';
 
 class ChickOutSuccess extends StatelessWidget {
   final String number;
   final String date;
+
   const ChickOutSuccess({super.key, required this.number, required this.date});
 
   @override
   Widget build(BuildContext context) {
+    final s = S.of(context);
+
     return Scaffold(
       body: Column(
         children: [
@@ -23,41 +26,39 @@ class ChickOutSuccess extends StatelessWidget {
                   children: [
                     // Success Lottie animation
                     Lottie.asset(
-                      Assets.jsonSuccess, // Replace with your asset path
+                      Assets.jsonSuccess,
                       width: 250,
                       height: 250,
                       fit: BoxFit.contain,
-                      repeat: false
+                      repeat: false,
                     ),
-                    
                     const SizedBox(height: 32),
-                    
+
                     // Success title
-                    const Text(
-                      'تمت العملية بنجاح!',
+                    Text(
+                      s.orderSuccessTitle,
                       style: TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
-                        color: Colors.green,
+                        color: Theme.of(context).colorScheme.primary,
                       ),
                     ),
-                    
                     const SizedBox(height: 16),
-                    
+
                     // Success message
-                    const Text(
-                      'شكراً لطلبك! تم تأكيد الطلب بنجاح وسيتم توصيله في أقرب وقت',
+                    Text(
+                      s.orderSuccessMessage,
                       textAlign: TextAlign.center,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 16,
                         color: Colors.grey,
                       ),
                     ),
-                    
                     const SizedBox(height: 24),
-                    
-                    // Order details card (optional)
+
+                    // Order details card
                     Card(
+                      color: Theme.of(context).cardColor,
                       elevation: 2,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -66,16 +67,16 @@ class ChickOutSuccess extends StatelessWidget {
                         padding: const EdgeInsets.all(16.0),
                         child: Column(
                           children: [
-                             Text(
-                              'رقم الطلب: #$number',
-                              style: const   TextStyle(
+                            Text(
+                              s.orderNumber(number),
+                              style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16,
                               ),
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              'تاريخ الطلب: ${date.substring(0, 10)}',
+                              s.orderDateNumber(date.substring(0, 10)),
                               style: const TextStyle(color: Colors.grey),
                             ),
                           ],
@@ -87,26 +88,27 @@ class ChickOutSuccess extends StatelessWidget {
               ),
             ),
           ),
-          
+
           // Bottom button
           Padding(
             padding: const EdgeInsets.all(24.0),
             child: ElevatedButton(
               onPressed: () {
-                // Navigate to home page
-                Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const NavBar(),));
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(builder: (context) => const NavBar()),
+                );
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue,
+                backgroundColor: Theme.of(context).colorScheme.primary,
                 minimumSize: const Size(double.infinity, 56),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
                 elevation: 3,
               ),
-              child: const Text(
-                'العودة إلى الصفحة الرئيسية',
-                style: TextStyle(
+              child: Text(
+                s.backToHome,
+                style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,

@@ -1,0 +1,24 @@
+import 'package:flutter/material.dart';
+import 'package:multi_vendor_e_commerce_app/core/models/product_model.dart';
+import 'package:multi_vendor_e_commerce_app/core/utils/styles/app_styles.dart';
+
+import '../../../../generated/l10n.dart';
+
+class ProductReview extends StatelessWidget {
+  final ProductModel product;
+  const ProductReview({super.key, required this.product});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(S.of(context).review, style: AppStyles.bold24(context)),
+      ),
+body: CustomScrollView(
+  slivers: [
+    SliverAnimatedList(findChildIndexCallback: (key) => 5,itemBuilder: (context, index, animation) => Text(product.comments[index].comment),initialItemCount: product.comments.length,)
+  ],
+),
+    );
+  }
+}

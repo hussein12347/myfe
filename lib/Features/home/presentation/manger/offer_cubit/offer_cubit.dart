@@ -22,7 +22,7 @@ class OfferCubit extends Cubit<OfferState> {
     emit(GetOffersLoading());
     offers = [];
     final result = await homeRepo.getOffers(
-      id: Supabase.instance.client.auth.currentUser!.id,
+      id: Supabase.instance.client.auth.currentUser?.id,
     );
 
     result.fold((l) => emit(GetOffersError(l.errMessage)), (r) {
@@ -50,7 +50,7 @@ class OfferCubit extends Cubit<OfferState> {
               product.wishlists.add(
                 WishlistModel(
                   userId: userId,
-                  id: Uuid().v4(), // حط ID لو عندك
+                  id: const Uuid().v4(), // حط ID لو عندك
                   productId: product.id,
                   createdAt: DateTime.now(),
                 ),

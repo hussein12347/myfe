@@ -1,6 +1,3 @@
-// DownloadModel.dart
-// Generated for the JSON you provided.
-
 import 'package:meta/meta.dart';
 
 @immutable
@@ -9,12 +6,14 @@ class UpdateModel {
   final DateTime createdAt;
   final String version;
   final String downloadUrl;
+  final bool isUnderMaintenance; // الجديد
 
   const UpdateModel({
     required this.id,
     required this.createdAt,
     required this.version,
     required this.downloadUrl,
+    required this.isUnderMaintenance,
   });
 
   UpdateModel copyWith({
@@ -22,12 +21,14 @@ class UpdateModel {
     DateTime? createdAt,
     String? version,
     String? downloadUrl,
+    bool? isUnderMaintenance,
   }) {
     return UpdateModel(
       id: id ?? this.id,
       createdAt: createdAt ?? this.createdAt,
       version: version ?? this.version,
       downloadUrl: downloadUrl ?? this.downloadUrl,
+      isUnderMaintenance: isUnderMaintenance ?? this.isUnderMaintenance,
     );
   }
 
@@ -35,8 +36,9 @@ class UpdateModel {
     return UpdateModel(
       id: json['id'] as String,
       createdAt: DateTime.parse(json['created_at'] as String),
-      version: json['version'] as String,
-      downloadUrl: json['download_url'] as String,
+      version: json['ios_version'] as String,
+      downloadUrl: json['ios_download_url'] as String,
+      isUnderMaintenance: json['ios_is_under_maintenance'] as bool, // الجديد
     );
   }
 
@@ -44,14 +46,15 @@ class UpdateModel {
     return {
       'id': id,
       'created_at': createdAt.toUtc().toIso8601String(),
-      'version': version,
-      'download_url': downloadUrl,
+      'ios_version': version,
+      'ios_download_url': downloadUrl,
+      'ios_is_under_maintenance': isUnderMaintenance, // الجديد
     };
   }
 
   @override
   String toString() {
-    return 'DownloadModel(id: \$id, createdAt: \$createdAt, version: \$version, downloadUrl: \$downloadUrl)';
+    return 'UpdateModel(id: $id, createdAt: $createdAt, version: $version, downloadUrl: $downloadUrl, isUnderMaintenance: $isUnderMaintenance)';
   }
 
   @override
@@ -61,17 +64,10 @@ class UpdateModel {
         other.id == id &&
         other.createdAt == createdAt &&
         other.version == version &&
-        other.downloadUrl == downloadUrl;
+        other.downloadUrl == downloadUrl &&
+        other.isUnderMaintenance == isUnderMaintenance;
   }
 
   @override
-  int get hashCode => Object.hash(id, createdAt, version, downloadUrl);
+  int get hashCode => Object.hash(id, createdAt, version, downloadUrl, isUnderMaintenance);
 }
-
-// Helpers:
-// - Parse a list of maps: jsonList.map((m) => DownloadModel.fromJson(m)).toList();
-// - Convert to json list: models.map((m) => m.toJson()).toList();
-
-// Example (commented):
-// final model = DownloadModel.fromJson(jsonMap);
-// final json = model.toJson();

@@ -1,13 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
-import 'package:multi_vendor_e_commerce_app/Features/my_orders/presentation/manger/order_cubit/order_cubit.dart';
 import 'package:multi_vendor_e_commerce_app/Features/my_orders/presentation/view/widgets/local_order_card.dart';
-import 'package:multi_vendor_e_commerce_app/Features/my_orders/presentation/view/widgets/order_card.dart';
-import 'package:multi_vendor_e_commerce_app/core/models/order_model.dart';
-import 'package:multi_vendor_e_commerce_app/core/utils/functions/is_arabic.dart';
 import 'package:multi_vendor_e_commerce_app/core/utils/styles/app_styles.dart';
-import 'package:multi_vendor_e_commerce_app/core/utils/widgets/custom_button.dart';
 import '../../../../core/utils/widgets/loading_widget.dart';
 import '../../../../generated/l10n.dart';
 import '../../data/repos/my_order_repo/my_order_repo_impl.dart';
@@ -48,11 +42,9 @@ class LocalLocalOrderScreen extends StatelessWidget {
                         .of(context)
                         .noOrders,
                     style: AppStyles.regular16(context).copyWith(
-                      color: Theme
-                          .of(context)
-                          .colorScheme
-                          .onBackground
-                          .withOpacity(0.7),
+                      color:Theme.of(context).brightness == Brightness.dark
+                          ? Colors.white70
+                          : Colors.grey,
                     ),
                   ),
                   const SizedBox(height: 10),
@@ -61,11 +53,9 @@ class LocalLocalOrderScreen extends StatelessWidget {
                         .of(context)
                         .noOrdersSubtitle,
                     style: AppStyles.regular14(context).copyWith(
-                      color: Theme
-                          .of(context)
-                          .colorScheme
-                          .onBackground
-                          .withOpacity(0.5),
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.white70
+                          : Colors.grey,
                     ),
                     textAlign: TextAlign.center,
                   ),

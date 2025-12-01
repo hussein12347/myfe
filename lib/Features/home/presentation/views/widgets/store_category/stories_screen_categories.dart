@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:multi_vendor_e_commerce_app/Features/home/presentation/views/widgets/store_category/stories_acreen_categories_body.dart';
 import 'package:multi_vendor_e_commerce_app/core/models/store_model.dart';
-import 'package:multi_vendor_e_commerce_app/core/utils/widgets/stories_screen_body.dart';
 
 import '../../../../data/models/store_category_model/sub_store_category.dart';
 

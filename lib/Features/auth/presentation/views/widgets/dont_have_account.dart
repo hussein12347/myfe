@@ -26,7 +26,7 @@ class DontHaveAccount extends StatelessWidget {
             ),
             recognizer: TapGestureRecognizer()
               ..onTap = () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => SignUpView(),));
+              Navigator.push(context, MaterialPageRoute(builder: (context) => const SignUpView(),));
               },
           ),
         ],

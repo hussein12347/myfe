@@ -1,4 +1,5 @@
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
@@ -41,7 +42,7 @@ class StoreItem extends StatelessWidget {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(16),
                 color: Theme.of(context).cardColor,
-                boxShadow: [
+                boxShadow: const [
                   BoxShadow(
                     color: Colors.black12,
                     blurRadius: 6,
@@ -54,20 +55,20 @@ class StoreItem extends StatelessWidget {
                 children: [
                   // صورة المتجر
                   ClipRRect(
-                    borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-                    child: Image.network(
-                      store.imageUrl,
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                    child: CachedNetworkImage(
+                      imageUrl:store.imageUrl,
                       height: 100,
                       width: double.infinity,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => Container(
+                      errorWidget: (_, __, ___) => Container(
                         height: 100,
                         color: Colors.grey[200],
-                        child: Center(child: Icon(Icons.store, size: 40)),
+                        child: const Center(child: Icon(Icons.store, size: 40)),
                       ),
                     ),
                   ),
-                  Spacer(),
+                  const Spacer(),
                   Padding(
                     padding: const EdgeInsets.all(12),
                     child: Column(
@@ -81,32 +82,36 @@ class StoreItem extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        SizedBox(height: 4),
-                        Row(
-                          children: [
-                            Icon(Icons.star, color: Colors.amber, size: 16),
-                            SizedBox(width: 4),
-                            Text(
-                              "${store.rating} (${store.ratingCount})",
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey[600],
-                              ),
-                            ),
-                          ],
-                        ),
+
+                        //remove it if you want show rate
+                        const SizedBox(
+                          height: 8,
+                        )
+                        // SizedBox(height: 4),
+                        // Row(
+                        //   children: [
+                        //     Icon(Icons.star, color: Colors.amber, size: 16),
+                        //     SizedBox(width: 4),
+                        //     Text(
+                        //       "${store.rating} (${store.ratingCount})",
+                        //       style: TextStyle(
+                        //         fontSize: 12,
+                        //         color: Colors.grey[600],
+                        //       ),
+                        //     ),
+                        //   ],
+                        // ),
                       ],
                     ),
                   ),
                 ],
               ),
             ),
-
             // ✅ زرار المفضلة
             Positioned(
               top: 5,
               right: 5,
-              child: _FavoriteButton(
+              child: FavoriteButton(
                 store: store,
                 onTap: favoriteOnPressed,
                 isDark: isDark,
@@ -119,28 +124,28 @@ class StoreItem extends StatelessWidget {
   }
 }
 
-class _FavoriteButton extends StatefulWidget {
+class FavoriteButton extends StatefulWidget {
   final StoreModel store;
   final Future<void> Function() onTap;
 
   final bool isDark;
 
-  const _FavoriteButton({
+  const FavoriteButton({super.key, 
     required this.store,
     required this.onTap,
     required this.isDark,
   });
 
   @override
-  State<_FavoriteButton> createState() => _FavoriteButtonState();
+  State<FavoriteButton> createState() => _FavoriteButtonState();
 }
 
-class _FavoriteButtonState extends State<_FavoriteButton> {
+class _FavoriteButtonState extends State<FavoriteButton> {
   bool isLoading = false;
 
   @override
   Widget build(BuildContext context) {
-    final isFavorited = widget.store.favoriteStores.any((fav) => (fav.storeId == widget.store.id && fav.userId==Supabase.instance.client.auth.currentUser!.id));
+    final isFavorited =(Supabase.instance.client.auth.currentUser?.id==null)?false: widget.store.favoriteStores.any((fav) => (fav.storeId == widget.store.id && fav.userId==Supabase.instance.client.auth.currentUser!.id));
 
     return Container(
       height: 36,
@@ -158,7 +163,7 @@ class _FavoriteButtonState extends State<_FavoriteButton> {
       ),
       child: isLoading
           ? Padding(
-              padding: EdgeInsets.all(10),
+              padding: const EdgeInsets.all(10),
               child: LoadingAnimationWidget.bouncingBall(
                 color: Colors.redAccent,
                 size: 18,

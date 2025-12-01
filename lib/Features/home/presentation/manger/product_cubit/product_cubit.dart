@@ -19,7 +19,7 @@ class ProductCubit extends Cubit<ProductState> {
   Future<void>getProducts()async{
     emit(GetProductsLoading());
     products=[];
-    final result = await repo.getProducts(id: Supabase.instance.client.auth.currentUser!.id);
+    final result = await repo.getProducts(id: Supabase.instance.client.auth.currentUser?.id);
 
     result.fold((l) => emit(GetProductsError(l.errMessage)), (r) {
       products=r;
@@ -43,7 +43,7 @@ class ProductCubit extends Cubit<ProductState> {
               product.wishlists.add(
                 WishlistModel(
                   userId: userId,
-                  id: Uuid().v4(), // حط ID لو عندك
+                  id: const Uuid().v4(), // حط ID لو عندك
                   productId: product.id,
                   createdAt: DateTime.now(),
                 ),

@@ -1,18 +1,14 @@
 import 'dart:developer';
 
 import 'package:dartz/dartz.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:multi_vendor_e_commerce_app/Features/my_orders/data/repos/my_order_repo/my_order_repo_impl.dart';
 import 'package:multi_vendor_e_commerce_app/Features/my_orders/data/repos/rate_repo/rete_repo.dart';
-import 'package:multi_vendor_e_commerce_app/Features/my_orders/presentation/manger/order_cubit/order_cubit.dart';
 import 'package:multi_vendor_e_commerce_app/core/errors/failures.dart';
 import 'package:multi_vendor_e_commerce_app/core/utils/api_services.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class RateRepoImpl implements RateRepo {
-  ApiServices _api = ApiServices();
+  final ApiServices _api = ApiServices();
   @override
   Future<Either<Failure, bool>> addRateProduct({required BuildContext context,required String productId, required int rate, required String comment}) async {
     try {

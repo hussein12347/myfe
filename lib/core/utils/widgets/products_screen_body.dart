@@ -1,7 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:multi_vendor_e_commerce_app/core/models/product_model.dart';
-import 'package:multi_vendor_e_commerce_app/core/utils/widgets/products_sliver_grid.dart';
+import 'package:multi_vendor_e_commerce_app/core/utils/widgets/product/products_sliver_grid.dart';
 import 'package:multi_vendor_e_commerce_app/core/utils/widgets/search/custom_search_text_field.dart';
 import 'package:multi_vendor_e_commerce_app/core/utils/widgets/search/search_filter_actions.dart';
 import '../../../../generated/l10n.dart';
@@ -18,6 +18,7 @@ class ProductsBody extends StatelessWidget {
   final Function(String) onSearchChanged;
   final Function(List<ProductModel>) onFilterApplied;
   final Function(String, List<ProductModel>) onSortApplied;
+  final bool isScrollable;
 
   const ProductsBody({
     super.key,
@@ -30,7 +31,7 @@ class ProductsBody extends StatelessWidget {
     required this.formKey,
     required this.onSearchChanged,
     required this.onFilterApplied,
-    required this.onSortApplied,
+    required this.onSortApplied,  this.isScrollable = true,
   });
 
   @override
@@ -68,8 +69,9 @@ class ProductsBody extends StatelessWidget {
         const SizedBox(height: 8),
         Expanded(
           child: CustomScrollView(
+            physics: !isScrollable?const NeverScrollableScrollPhysics():null,
             slivers: [
-              ProductsSliverGrid(products: filteredProducts),
+              ProductsSliverGrid(products: filteredProducts,isHome: false,),
               SliverToBoxAdapter(
                 child: SizedBox(
                   height: AppDimensions.getBottomBarTotalHeight(context),

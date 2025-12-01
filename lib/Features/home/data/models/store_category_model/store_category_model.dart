@@ -35,7 +35,7 @@ class StoreCategory {
       deleteLogoUrl: json['delete_logo_url'],
       isShow: json['is_show'],
       stores: (json['stores'] as List)
-          .map((store) => StoreModel.fromJson(store, currentUserId: Supabase.instance.client.auth.currentUser!.id))
+          .map((store) => StoreModel.fromJson(store, currentUserId: Supabase.instance.client.auth.currentUser?.id))
           .toList(),
       storeSubCategory: (json['store_sub_category'] as List)
           .map((subCategory) => SubStoreCategory.fromJson(subCategory))

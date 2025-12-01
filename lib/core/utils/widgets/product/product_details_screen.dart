@@ -1,22 +1,26 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:multi_vendor_e_commerce_app/core/models/product_model.dart';
 import 'package:multi_vendor_e_commerce_app/core/utils/functions/is_arabic.dart';
 import 'package:multi_vendor_e_commerce_app/core/utils/styles/app_styles.dart';
-import 'package:multi_vendor_e_commerce_app/core/utils/widgets/product_image_details_screen.dart';
-import '../../../Features/cart/presentation/manger/cart_cubit/cart_cubit.dart';
-import '../../../Features/home/data/repos/home_repo_impl.dart';
-import '../../../Features/home/presentation/manger/offer_cubit/offer_cubit.dart';
-import '../../../Features/home/presentation/manger/product_cubit/product_cubit.dart';
-import '../../../generated/l10n.dart';
-import 'custom_button.dart';
+import 'package:multi_vendor_e_commerce_app/core/utils/widgets/product/product_image_details_screen.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../../Features/cart/presentation/manger/cart_cubit/cart_cubit.dart';
+import '../../../../Features/home/data/repos/home_repo_impl.dart';
+import '../../../../Features/home/presentation/manger/offer_cubit/offer_cubit.dart';
+import '../../../../Features/home/presentation/manger/product_cubit/product_cubit.dart';
+import '../../../../generated/l10n.dart';
+import '../../functions/show_message.dart';
+import '../custom_button.dart';
 
 // ويدجت رئيسية لشاشة تفاصيل المنتج
 class ProductDetailsScreen extends StatefulWidget {
   final ProductModel product;
+  final void Function()? onTap;
 
-  const ProductDetailsScreen({super.key, required this.product});
+  const ProductDetailsScreen({super.key, required this.product,required this.onTap});
 
   @override
   State<ProductDetailsScreen> createState() => _ProductDetailsScreenState();
@@ -48,14 +52,20 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
             onWishlistPressed: () => _toggleWishlist(context),
           ),
           // 🔹 تفاصيل المنتج
-          ProductDetailsContent(product: widget.product),
+          ProductDetailsContent(product: widget.product,onTap: widget.onTap,),
         ],
       ),
       // 🔹 زر الإضافة إلى السلة
       bottomNavigationBar: AddToCartButton(
         product: widget.product,
         onPressed: () {
-          if (widget.product.quantity > 0) {
+          if(Supabase.instance.client.auth.currentUser?.id == null)
+          {
+            ShowMessage.showToast(S
+                .of(context)
+                .mustLoginFirst);
+          }
+         else if (widget.product.quantity > 0) {
             context.read<CartCubit>().addItem(widget.product, context);
           }
         },
@@ -146,12 +156,12 @@ class ProductDetailsAppBar extends StatelessWidget {
                           // صورة المنتج الصغيرة
                           ClipRRect(
                             borderRadius: BorderRadius.circular(12),
-                            child: Image.network(
-                              product.imageUrl ?? '',
+                            child: CachedNetworkImage(
+                              imageUrl:product.productImages[0].imageUrl ?? '',
                               width: 50,
                               height: 50,
                               fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) =>
+                              errorWidget: (context, error, stackTrace) =>
                               const Icon(Icons.error, color: Colors.red),
                             ),
                           ),
@@ -242,8 +252,9 @@ class ProductDetailsAppBar extends StatelessWidget {
 // ويدجت لعرض تفاصيل المنتج
 class ProductDetailsContent extends StatelessWidget {
   final ProductModel product;
+  final void Function()? onTap;
 
-  const ProductDetailsContent({super.key, required this.product});
+  const ProductDetailsContent({super.key, required this.product, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -281,6 +292,7 @@ class ProductDetailsContent extends StatelessWidget {
                         ),
                         const SizedBox(width: 8),
                          GestureDetector(
+                           onTap: onTap,
                            child: Text(S.of(context).review,
                                style: AppStyles.regular18(context).copyWith(
                              color: Theme.of(context).colorScheme.secondary,
@@ -323,7 +335,7 @@ class ProductDetailsContent extends StatelessWidget {
             const SizedBox(height: 20),
             // 📝 الوصف
             Text(
-              S.of(context).description + ' :',
+              '${S.of(context).description} :',
               style: AppStyles.semiBold16(context).copyWith(
                 color: Theme.of(context).colorScheme.secondary,
               ),

@@ -3,10 +3,20 @@ class Assets {
   Assets._();
 
   static const String imagesArrowSwapHorizontal = 'assets/images/arrow-swap-horizontal.svg';
+  static const String imagesBell = 'assets/images/bell.svg';
+  static const String imagesBox = 'assets/images/box.svg';
   static const String imagesFillter = 'assets/images/fillter.svg';
   static const String imagesGoogle = 'assets/images/google.svg';
   static const String imagesLogo = 'assets/images/logo.png';
+  static const String imagesLogo14 = 'assets/images/logo14.png';
+  static const String imagesLogo2 = 'assets/images/logo2.png';
+  static const String imagesLogout = 'assets/images/logout.svg';
+  static const String imagesPlaystore = 'assets/images/playstore.png';
+  static const String json404Blue = 'assets/json/404_blue.json';
   static const String jsonSadEmptyBox = 'assets/json/sad_empty_box.json';
   static const String jsonSuccess = 'assets/json/success.json';
+  static const String jsonUpdate= 'assets/json/update.json';
+  static const String jsonLogin= 'assets/json/Login.json';
+  static const String jsonMaintenance= 'assets/json/maintenance.json';
 
 }

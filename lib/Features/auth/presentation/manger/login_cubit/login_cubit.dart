@@ -1,5 +1,5 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:meta/meta.dart';
 
 import 'package:multi_vendor_e_commerce_app/core/models/user_model.dart';
 
@@ -15,10 +15,11 @@ class LoginCubit extends Cubit<LoginState> {
   Future<void> loginUser({
     required String email,
     required String password,
+    required BuildContext context,
   }) async {
     emit(LoginLoading());
 
-    final result = await authRepo.login(email: email, password: password);
+    final result = await authRepo.login(email: email, password: password, context: context);
 
     result.fold(
           (failure) => emit(LoginError(failure.errMessage)),
@@ -26,15 +27,15 @@ class LoginCubit extends Cubit<LoginState> {
     );
   }
 
-  Future<void> googleLogIn(
-  ) async {
-    emit(LoginLoading());
-
-    final result = await authRepo.googleLoginIn();
-
-    result.fold(
-          (failure) => emit(LoginError(failure.errMessage)),
-          (user) => emit(LoginSuccess(user)),
-    );
-  }
+  // Future<void> googleLogIn(
+  // ) async {
+  //   emit(LoginLoading());
+  //
+  //   final result = await authRepo.googleLoginIn();
+  //
+  //   result.fold(
+  //         (failure) => emit(LoginError(failure.errMessage)),
+  //         (user) => emit(LoginSuccess(user)),
+  //   );
+  // }
 }

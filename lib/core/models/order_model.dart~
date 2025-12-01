@@ -1,0 +1,60 @@
+import 'package:uuid/uuid.dart';
+
+class OrderModel {
+  final String id; // رقم الطلب (UUID)
+  final String userId; // صاحب الطلب
+  final String storeId; // المتجر اللي هيتنفذ منه الطلب
+  final List<String> productIds; // المنتجات اللي في الأوردر
+  final double totalPrice; // السعر الإجمالي
+  final String status; // حالة الطلب (pending, confirmed, shipped, delivered, canceled)
+  final DateTime createdAt; // وقت إنشاء الطلب
+  final DateTime? updatedAt; // وقت آخر تحديث
+  final String? address; // عنوان التوصيل
+  final String? paymentMethod; // طريقة الدفع (كاش، فيزا ..)
+
+  OrderModel({
+    String? id,
+    required this.userId,
+    required this.storeId,
+    required this.productIds,
+    required this.totalPrice,
+    this.status = "pending",
+    DateTime? createdAt,
+    this.updatedAt,
+    this.address,
+    this.paymentMethod,
+  })  : id = id ?? const Uuid().v4(),
+        createdAt = createdAt ?? DateTime.now();
+
+  // من JSON
+  factory OrderModel.fromJson(Map<String, dynamic> json) {
+    return OrderModel(
+      id: json['id'],
+      userId: json['userId'],
+      storeId: json['storeId'],
+      productIds: List<String>.from(json['productIds']),
+      totalPrice: (json['totalPrice'] as num).toDouble(),
+      status: json['status'],
+      createdAt: DateTime.parse(json['createdAt']),
+      updatedAt: json['updatedAt'] != null ? DateTime.parse(json['updatedAt']) : null,
+      address: json['address'],
+      paymentMethod: json['paymentMethod'],
+    );
+  }
+
+  // لـ JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'userId': userId,
+      'storeId': storeId,
+      'productIds': productIds,
+      'totalPrice': totalPrice,
+      'status': status,
+      'createdAt': createdAt.toIso8601String(),
+      'updatedAt': updatedAt?.toIso8601String(),
+      'address': address,
+      'paymentMethod': paymentMethod,
+    };
+  }
+}

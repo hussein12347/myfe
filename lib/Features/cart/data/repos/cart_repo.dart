@@ -5,5 +5,9 @@ import 'package:multi_vendor_e_commerce_app/core/errors/failures.dart';
 
 abstract class CartRepo{
   Future <Either<Failure, bool>> checkProductsAvilable(BuildContext context, CartModel cart) ;
-  Future <Either<Failure, String>> addProductToCart( {required CartModel cart,required String name,required String phone,required String address,required bool isPaid,required String addressUrl,required double price,}) ;
+  Future <Either<Failure, String>> addProductToCart( {required CartModel cart,required String store_id,required String name,required String phone,required String address,required bool isPaid,required String addressUrl,required double price,}) ;
+  Future <Either<Failure, String>> addProductToLocalCart( {required CartModel cart,required String store_id,required String name,required String phone,required String address,required bool isPaid,required String addressUrl,required double price,}) ;
+
 }
+
+

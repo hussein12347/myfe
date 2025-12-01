@@ -2,15 +2,11 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:multi_vendor_e_commerce_app/Features/home/data/models/store_category_model/store_category_model.dart';
-import 'package:multi_vendor_e_commerce_app/Features/home/presentation/manger/product_cubit/product_cubit.dart';
 import 'package:multi_vendor_e_commerce_app/Features/home/presentation/manger/store_cubit/store_cubit.dart';
 import 'package:multi_vendor_e_commerce_app/Features/home/presentation/views/widgets/store_category/stories_screen_categories.dart';
-import 'package:multi_vendor_e_commerce_app/core/models/category_model.dart';
 import 'package:multi_vendor_e_commerce_app/core/utils/functions/is_arabic.dart';
-import 'package:multi_vendor_e_commerce_app/core/utils/widgets/products_screen.dart';
 
 import '../../../../../../core/utils/styles/app_styles.dart';
-import '../../../../../../core/utils/widgets/stories_screen.dart';
 
 
 class StoreCategoryItem extends StatelessWidget {
@@ -21,8 +17,8 @@ class StoreCategoryItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8, top: 2),
-      child: InkWell(
+      padding: const EdgeInsets.only(bottom: 8, top: 2,right: 8,left: 8),
+      child: GestureDetector(
         onTap: () {
           //هنا
           // Navigator.push(
@@ -60,11 +56,10 @@ class StoreCategoryItem extends StatelessWidget {
         },
         child: Container(
           width: 100,
-          margin: const EdgeInsets.symmetric(horizontal: 8),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
             color: Theme.of(context).cardColor,
-            boxShadow: [
+            boxShadow: const [
               BoxShadow(
                 color: Colors.black12,
                 blurRadius: 4,
@@ -81,7 +76,7 @@ class StoreCategoryItem extends StatelessWidget {
                 child: Container(
                   decoration: ShapeDecoration(
                     color: Colors.grey[200],
-                    shape: RoundedRectangleBorder(
+                    shape: const RoundedRectangleBorder(
                       borderRadius: BorderRadiusGeometry.only(
                         topLeft: Radius.circular(16),
                         topRight: Radius.circular(16),
@@ -94,7 +89,7 @@ class StoreCategoryItem extends StatelessWidget {
                       imageUrl:category.logoUrl,
                       fit: BoxFit.cover,
                       errorWidget: (_, __, ___) =>
-                          Icon(Icons.category, size: 30),
+                          const Icon(Icons.category, size: 30),
                     ),
                   ),
                 ),

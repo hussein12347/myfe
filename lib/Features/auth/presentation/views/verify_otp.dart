@@ -8,7 +8,6 @@ import '../../../../core/utils/functions/show_message.dart';
 import '../../../../core/utils/widgets/custom_button.dart';
 import '../../../../core/utils/widgets/loading_widget.dart';
 import '../../../../generated/l10n.dart';
-import '../../../profile/presentation/widgets/change_password.dart';
 import '../manger/reset_password_cubit/reset_password_cubit.dart';
 
 class VerifyOTPScreen extends StatefulWidget {
@@ -91,33 +90,36 @@ class _VerifyOTPScreenState extends State<VerifyOTPScreen> {
                     ),
                   ),
                   const SizedBox(height: 30),
-                  OtpTextField(
-                    numberOfFields: 6,
-                    borderColor: theme.colorScheme.primary,
-                    focusedBorderColor: theme.colorScheme.primary,
-                    showFieldAsBox: true,
-                    borderWidth: 2.0,
-                    fieldWidth: 50,
-                    fieldHeight: 50,
-                    textStyle: AppStyles.semiBold16(context),
-                    borderRadius: BorderRadius.circular(8),
-                    cursorColor: theme.colorScheme.primary,
-                    filled: true,
-                    fillColor: theme.inputDecorationTheme.fillColor!,
-                    onCodeChanged: (value) {
-                      otp = value;
-                    },
-                    onSubmit: (value) {
-                      otp = value;
-                      if (otp.length == 6) {
-                        context.read<ResetPasswordCubit>().verifyOTP(otp: otp, context: context);
-                      } else {
-                        ShowMessage.showToast(
-                          S.of(context).otp_invalid_length,
-                          backgroundColor: Colors.red,
-                        );
-                      }
-                    },
+                  Directionality(
+                    textDirection: TextDirection.ltr,
+                    child: OtpTextField(
+                      numberOfFields: 6,
+                      borderColor: theme.colorScheme.primary,
+                      focusedBorderColor: theme.colorScheme.primary,
+                      showFieldAsBox: true,
+                      borderWidth: 2.0,
+                      fieldWidth: 50,
+                      fieldHeight: 50,
+                      textStyle: AppStyles.semiBold16(context),
+                      borderRadius: BorderRadius.circular(8),
+                      cursorColor: theme.colorScheme.primary,
+                      filled: true,
+                      fillColor: theme.inputDecorationTheme.fillColor!,
+                      onCodeChanged: (value) {
+                        otp = value;
+                      },
+                      onSubmit: (value) {
+                        otp = value;
+                        if (otp.length == 6) {
+                          context.read<ResetPasswordCubit>().verifyOTP(otp: otp, context: context);
+                        } else {
+                          ShowMessage.showToast(
+                            S.of(context).otp_invalid_length,
+                            backgroundColor: Colors.red,
+                          );
+                        }
+                      },
+                    ),
                   ),
                   const SizedBox(height: 30),
                   Padding(

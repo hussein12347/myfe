@@ -9,8 +9,7 @@ import 'package:http/http.dart' as http;
 import 'package:location/location.dart';
 import 'package:multi_vendor_e_commerce_app/core/utils/functions/show_message.dart' show ShowMessage;
 import 'package:multi_vendor_e_commerce_app/generated/l10n.dart';
-
-
+import 'package:multi_vendor_e_commerce_app/core/utils/styles/app_styles.dart';
 
 class MapPickerScreen extends StatefulWidget {
   const MapPickerScreen({super.key});
@@ -20,8 +19,8 @@ class MapPickerScreen extends StatefulWidget {
 }
 
 class _MapPickerScreenState extends State<MapPickerScreen> {
-  LatLng selectedLocation = LatLng(29.574217686990803,31.289961721105982); // الصف جسر داوود
-  String address = 'جاري تحديد الموقع...';
+  LatLng selectedLocation = const LatLng(29.574217686990803, 31.289961721105982); // Default location
+  String address = '';
 
   final MapController _mapController = MapController();
   final Location _location = Location();
@@ -42,10 +41,17 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
     _debounce?.cancel();
     super.dispose();
   }
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Initialize address with localized string after context is ready
+    address = S.of(context).loading_location;
+    setState(() {}); // Update state to reflect the initialized address
+  }
 
   Future<void> _getAddressFromLatLng(LatLng latLng) async {
     final url = Uri.parse(
-      'https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latLng.latitude}&lon=${latLng.longitude}&accept-language=ar',
+      'https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latLng.latitude}&lon=${latLng.longitude}&accept-language=${S.of(context).localeName}',
     );
 
     try {
@@ -56,16 +62,16 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         setState(() {
-          address = data['display_name'] ?? 'تعذر جلب العنوان';
+          address = data['display_name'] ?? S.of(context).failed_to_fetch_address;
         });
       } else {
         setState(() {
-          address = 'تعذر جلب العنوان';
+          address = S.of(context).failed_to_fetch_address;
         });
       }
     } catch (e) {
       setState(() {
-        address = 'تعذر جلب العنوان';
+        address = S.of(context).failed_to_fetch_address;
       });
     }
   }
@@ -87,41 +93,44 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
 
     if (locationData.latitude != null && locationData.longitude != null) {
       final current = LatLng(locationData.latitude!, locationData.longitude!);
+      if (!mounted) return;
       setState(() {
         selectedLocation = current;
       });
-      _mapController.move(current, 17.0); // تكبير أكبر
+      _mapController.move(current, 17.0);
       _getAddressFromLatLng(current);
     }
   }
 
   void _zoomIn() {
     final zoom = _mapController.camera.zoom;
-    if (zoom < 18) { // عدّل الرقم حسب الماكسيمم
+    if (zoom < 18) {
       _mapController.move(_mapController.camera.center, zoom + 1);
     }
   }
 
   void _zoomOut() {
     final zoom = _mapController.camera.zoom;
-    if (zoom > 3) { // عدّل الرقم حسب المينيمم
+    if (zoom > 3) {
       _mapController.move(_mapController.camera.center, zoom - 1);
     }
   }
 
-
   void _onConfirm() {
     final url =
         'https://www.google.com/maps/search/?api=1&query=${selectedLocation.latitude},${selectedLocation.longitude}';
-    if ( address!='جاري تحديد الموقع...') {
+    if (address != S.of(context).loading_location) {
       Navigator.pop(context, {
         'address': address,
         'url': url,
         'lat': selectedLocation.latitude,
         'lng': selectedLocation.longitude,
       });
-    }else{
-      ShowMessage.showToast('بالرجاء الإنتظار لتحديد الموقع',backgroundColor: Colors.green);
+    } else {
+      ShowMessage.showToast(
+        S.of(context).please_wait_for_location,
+        backgroundColor: Colors.green,
+      );
     }
   }
 
@@ -134,7 +143,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
     }
 
     final url = Uri.parse(
-        'https://nominatim.openstreetmap.org/search?q=$query&format=json&addressdetails=1&accept-language=ar&limit=5');
+        'https://nominatim.openstreetmap.org/search?q=$query&format=json&addressdetails=1&accept-language=${S.of(context).localeName}&limit=5');
 
     try {
       final response = await http.get(url, headers: {
@@ -176,7 +185,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
       address = name;
       searchResults.clear();
       _searchController.clear();
-      _searchController.text=address;
+      _searchController.text = address;
     });
     _mapController.move(newLocation, 17.0);
   }
@@ -222,8 +231,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
             ],
           ),
 
-
-          // صندوق البحث ونتائج البحث
+          // Search bar and results
           Positioned(
             top: 25,
             left: 12,
@@ -240,9 +248,11 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     TextField(
+                      style: const TextStyle(color: Colors.black),
                       controller: _searchController,
                       decoration: InputDecoration(
-                        prefixIcon: const Icon(Icons.search,),
+                        prefixIcon: const Icon(Icons.search),
+
                         hintText: S.of(context).search_for_location,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -258,7 +268,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
                         constraints: const BoxConstraints(maxHeight: 200),
                         decoration: BoxDecoration(
                           color: Colors.white,
-                          borderRadius: BorderRadius.vertical(
+                          borderRadius: const BorderRadius.vertical(
                               bottom: Radius.circular(12)),
                           boxShadow: [
                             BoxShadow(
@@ -295,8 +305,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
             ),
           ),
 
-
-          // العنوان والتأكيد في الأسفل
+          // Address and confirm button at the bottom
           Align(
             alignment: Alignment.bottomCenter,
             child: Container(
@@ -322,8 +331,11 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
                     width: double.infinity,
                     child: ElevatedButton.icon(
                       onPressed: _onConfirm,
-                      icon: const Icon(Icons.check),
-                      label: const Text('تأكيد الموقع'),
+                      icon: const Icon(Icons.check, color: Colors.white),
+                      label: Text(
+                        S.of(context).confirm_location,
+                        style: AppStyles.semiBold18(context),
+                      ),
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         textStyle: const TextStyle(
@@ -343,7 +355,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
 
           Positioned(
             left: 12,
-            top: context.mediaQuery.size.height/2,
+            top: context.mediaQuery.size.height / 2,
             child: Column(
               children: [
                 FloatingActionButton(
@@ -369,7 +381,6 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
               ],
             ),
           ),
-
         ],
       ),
     );

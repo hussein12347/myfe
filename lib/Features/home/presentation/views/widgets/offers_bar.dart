@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:multi_vendor_e_commerce_app/core/utils/functions/is_arabic.dart';
@@ -39,6 +40,8 @@ class _OffersBarState extends State<OffersBar> {
     final double carouselHeight = isPortrait
         ? size.height * 0.19
         : size.height * 0.4;
+
+
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -96,7 +99,7 @@ class _OffersBarState extends State<OffersBar> {
 
   Widget _buildCarouselItem(String image, GestureTapCallback? onTap) {
     return Padding(
-      padding: EdgeInsets.symmetric(
+      padding: const EdgeInsets.symmetric(
         horizontal: _CarouselConstants.horizontalPadding,
       ),
       child: ClipRRect(
@@ -105,8 +108,8 @@ class _OffersBarState extends State<OffersBar> {
           onTap: onTap,
           child: Container(
             color: Colors.grey.shade200,
-            child: Image.network(
-              image,
+            child: CachedNetworkImage(
+              imageUrl:image,
               fit: BoxFit.cover,
               width: double.infinity,
             ),

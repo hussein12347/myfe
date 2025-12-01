@@ -36,7 +36,7 @@ class SubStoreCategory {
       isShow: json['is_show'],
       storeCategoryId: json['store_category_id'],
       stores: (json['stores'] as List)
-          .map((store) => StoreModel.fromJson(store, currentUserId: Supabase.instance.client.auth.currentUser!.id))
+          .map((store) => StoreModel.fromJson(store, currentUserId: Supabase.instance.client.auth.currentUser?.id))
           .toList(),
     );
   }

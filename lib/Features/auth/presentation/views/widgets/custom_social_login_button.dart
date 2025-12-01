@@ -27,12 +27,12 @@ class CustomSocialLoginButton extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              icon??SizedBox.shrink(),
+              icon??const SizedBox.shrink(),
               Text(
                   text,
                   style:AppStyles.semiBold18(context)
               ),
-              SizedBox()
+              const SizedBox()
             ],
           ),
         ),

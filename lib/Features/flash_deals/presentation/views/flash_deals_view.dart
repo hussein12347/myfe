@@ -102,7 +102,7 @@ class _FlashDealsScreenState extends State<FlashDealsScreen> {
                   const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: () => context.read<FlashDealsCubit>().getFlashDeals(),
-                    child: Text('Retry'),
+                    child: const Text('Retry'),
                   ),
                 ],
               ),

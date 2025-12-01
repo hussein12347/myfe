@@ -1,4 +1,5 @@
 import 'package:badges/badges.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart' hide Badge;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lottie/lottie.dart';
@@ -138,14 +139,14 @@ class StoreCartView extends StatelessWidget {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(10),
-                child: Image.network(
-                  product.productImages.isNotEmpty
+                child: CachedNetworkImage(
+                 imageUrl: product.productImages.isNotEmpty
                       ? product.productImages[0].imageUrl
                       : '',
                   width: 80,
                   height: 80,
                   fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => const Icon(Icons.broken_image),
+                  errorWidget: (_, __, ___) => const Icon(Icons.broken_image),
                 ),
               ),
               const SizedBox(width: 12),

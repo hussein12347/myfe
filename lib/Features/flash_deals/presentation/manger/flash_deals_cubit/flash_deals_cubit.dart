@@ -14,7 +14,7 @@ class FlashDealsCubit extends Cubit<FlashDealsState> {
 
   Future<void> getFlashDeals()async{
     emit(GetFlashDealsLoading());
-    final result = await homeRepo.getFlashDeals(id: Supabase.instance.client.auth.currentUser!.id);
+    final result = await homeRepo.getFlashDeals(id: Supabase.instance.client.auth.currentUser?.id);
 
     result.fold((l) => emit(GetFlashDealsError(l.errMessage)), (r) {
       emit(GetFlashDealsSuccess(r));

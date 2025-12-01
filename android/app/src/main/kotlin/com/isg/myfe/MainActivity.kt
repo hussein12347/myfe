@@ -1,4 +1,4 @@
-package com.example.multi_vendor_e_commerce_app
+package com.isg.myfe
 
 import io.flutter.embedding.android.FlutterActivity
 

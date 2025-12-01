@@ -9,7 +9,6 @@ import 'package:multi_vendor_e_commerce_app/features/my_orders/data/repos/rate_r
 import 'package:multi_vendor_e_commerce_app/features/my_orders/presentation/manger/rate_cubit/rate_cubit.dart';
 import 'package:multi_vendor_e_commerce_app/generated/l10n.dart';
 
-import '../../../../../core/models/rate_model.dart';
 import '../../../../home/presentation/manger/product_cubit/product_cubit.dart';
 import '../../manger/local_order_cubit/local_order_cubit.dart';
 

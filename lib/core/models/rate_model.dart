@@ -1,11 +1,17 @@
+
 class RateModel {
   final String id;
   final double rate;
   final String userId;
+  final String? replay;
+  final String? comment;
   final String productId;
   final DateTime createdAt;
+  final String userName;
 
-  RateModel({
+  RateModel( {
+    required this.userName,
+    required this.replay,required this.comment,
     required this.id,
     required this.rate,
     required this.userId,
@@ -19,6 +25,8 @@ class RateModel {
       'user_id': userId,
       'product_id': productId,
       'created_at': createdAt.toIso8601String(),
+      'comment': comment,
+      'replay': replay
     };
   }
 
@@ -29,7 +37,7 @@ class RateModel {
       rate: (json['rate'] as num).toDouble(),
       userId: json['user_id'],
       productId: json['product_id'],
-      createdAt: DateTime.parse(json['created_at']),
+      createdAt: DateTime.parse(json['created_at']), replay: json['replay'], comment: json['comment'], userName: json['users']['name'],
     );
   }
 }

@@ -17,12 +17,7 @@ class OrdersTabbedScreen extends StatelessWidget {
           title: Text(S
               .of(context)
               .myOrders,
-            style: AppStyles.bold20(context).copyWith(
-              color: Theme
-                  .of(context)
-                  .colorScheme
-                  .onBackground,
-            ),
+            style: AppStyles.bold20(context)
           ),
           centerTitle: true,
           elevation: 0,
@@ -30,8 +25,9 @@ class OrdersTabbedScreen extends StatelessWidget {
 
         bottom: TabBar(
             labelColor: Theme.of(context).colorScheme.primary,
-            unselectedLabelColor: Theme.of(context).colorScheme.onBackground.withOpacity(0.6),
-            indicatorColor: Theme.of(context).colorScheme.primary,
+          unselectedLabelColor: Theme.of(context).brightness == Brightness.dark
+              ? Colors.white70
+              : Colors.grey, indicatorColor: Theme.of(context).colorScheme.primary,
             tabs:  [
               Tab(text: S.of(context).online),
               Tab(text: S.of(context).local),

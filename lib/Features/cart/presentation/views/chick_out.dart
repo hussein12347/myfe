@@ -5,13 +5,15 @@ import 'package:multi_vendor_e_commerce_app/Features/cart/data/models/cart_model
 import 'package:multi_vendor_e_commerce_app/Features/cart/presentation/manger/cart_cubit/cart_cubit.dart';
 import 'package:multi_vendor_e_commerce_app/Features/cart/presentation/views/widgets/chick_out_success.dart';
 import 'package:multi_vendor_e_commerce_app/Features/cart/presentation/views/widgets/chick_out_widget.dart';
-import 'package:multi_vendor_e_commerce_app/Features/home/presentation/views/home_view.dart';
 import 'package:multi_vendor_e_commerce_app/core/utils/functions/show_message.dart';
 import 'package:multi_vendor_e_commerce_app/core/utils/widgets/custom_button.dart';
 import 'package:multi_vendor_e_commerce_app/core/utils/widgets/loading_widget.dart';
 import 'package:multi_vendor_e_commerce_app/generated/l10n.dart';
 import 'package:pay_with_paymob/pay_with_paymob.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
+import '../../../../core/utils/functions/calculate_distance.dart';
+import '../../data/models/cart_item_model/cart_item_model.dart';
 
 class ChickOutView extends StatefulWidget {
   final CartModel cart;
@@ -21,6 +23,9 @@ class ChickOutView extends StatefulWidget {
   final String address;
   final double deliveryPrice;
   final String addressUrl;
+  final double userLat;
+  final double userLog;
+
   const ChickOutView({
     super.key,
     required this.cart,
@@ -29,7 +34,7 @@ class ChickOutView extends StatefulWidget {
     required this.address,
     required this.deliveryPrice,
     required this.payWay,
-    required this.addressUrl,
+    required this.addressUrl, required this.userLat, required this.userLog,
   });
 
   @override
@@ -38,39 +43,50 @@ class ChickOutView extends StatefulWidget {
 
 class _ChickOutViewState extends State<ChickOutView> {
   @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    PaymentData.initialize(
-      apiKey:
-          "ZXlKaGJHY2lPaUpJVXpVeE1pSXNJblI1Y0NJNklrcFhWQ0o5LmV5SmpiR0Z6Y3lJNklrMWxjbU5vWVc1MElpd2ljSEp2Wm1sc1pWOXdheUk2TVRBMk5qWTVNQ3dpYm1GdFpTSTZJbWx1YVhScFlXd2lmUS5wNVdMZkV1NEx6TWJPVWVkRDVfY3AwQWtWelB4OXV4R1FYRk9SSldRTWxyLUk4T0pCdXFnWk5QQl9pWWFkQ2FpUWRkTVJNT29PamFxY250NjVPRU1pUQ==", // Required: Found under Dashboard -> Settings -> Account Info -> API Key
-      iframeId: "947241", // Required: Found under Developers -> iframes
-      integrationCardId:
-          "5229376", // Required: Found under Developers -> Payment Integrations -> Online Card ID
-      integrationMobileWalletId:
-          "5229377", // Required: Found under Developers -> Payment Integrations -> Mobile Wallet ID
-      // Optional User Data
-      userData: UserData(
-        email:
-            Supabase.instance.client.auth.currentUser?.email ??
-            '', // Optional: Defaults to 'NA'
-        phone: widget.phone, // Optional: Defaults to 'NA'
-        name: widget.name, // Optional: Defaults to 'NA'
-      ),
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
 
-      // Optional Style Customizations
+    final theme = Theme.of(context);
+
+    PaymentData.initialize(
+      apiKey: "ZXlKaGJHY2lPaUpJVXpVeE1pSXNJblI1Y0NJNklrcFhWQ0o5LmV5SmpiR0Z6Y3lJNklrMWxjbU5vWVc1MElpd2ljSEp2Wm1sc1pWOXdheUk2TVRBMk5qWTVNQ3dpYm1GdFpTSTZJbWx1YVhScFlXd2lmUS5wNVdMZkV1NEx6TWJPVWVkRDVfY3AwQWtWelB4OXV4R1FYRk9SSldRTWxyLUk4T0pCdXFnWk5QQl9pWWFkQ2FpUWRkTVJNT29PamFxY250NjVPRU1pUQ==",
+      iframeId: "947241",
+      integrationCardId: "5229376",
+      integrationMobileWalletId: "5229377",
+      userData: UserData(
+        email: Supabase.instance.client.auth.currentUser?.email ?? '',
+        phone: widget.phone,
+        name: widget.name,
+      ),
       style: Style(
-        primaryColor: Colors.blue, // Default: Colors.blue
-        scaffoldColor: Colors.white, // Default: Colors.white
-        appBarBackgroundColor: Colors.blue, // Default: Colors.blue
-        appBarForegroundColor: Colors.white, // Default: Colors.white
-        textStyle: const TextStyle(), // Default: TextStyle()
-        buttonStyle:
-            ElevatedButton.styleFrom(), // Default: ElevatedButton.styleFrom()
-        circleProgressColor: Colors.blue, // Default: Colors.blue
-        unselectedColor: Colors.grey, // Default: Colors.grey
+        primaryColor: theme.colorScheme.primary,
+        scaffoldColor: theme.scaffoldBackgroundColor,
+        appBarBackgroundColor: theme.appBarTheme.backgroundColor ?? theme.colorScheme.primary,
+        appBarForegroundColor: theme.appBarTheme.foregroundColor ?? theme.colorScheme.onPrimary,
+        textStyle: theme.textTheme.bodyMedium ?? const TextStyle(),
+        buttonStyle: ElevatedButton.styleFrom(
+          backgroundColor: theme.colorScheme.primary,
+          foregroundColor: theme.colorScheme.onPrimary,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+        circleProgressColor: theme.colorScheme.secondary,
+        unselectedColor: theme.unselectedWidgetColor,
       ),
     );
+  }
+
+  // Group cart items by storeId
+  Map<String, List<CartItemModel>> _groupItemsByStore() {
+    final Map<String, List<CartItemModel>> storeItems = {};
+    for (var item in widget.cart.items) {
+      final storeId = item.product.storeId;
+      if (!storeItems.containsKey(storeId)) {
+        storeItems[storeId] = [];
+      }
+      storeItems[storeId]!.add(item);
+    }
+    return storeItems;
   }
 
   @override
@@ -79,12 +95,10 @@ class _ChickOutViewState extends State<ChickOutView> {
       appBar: AppBar(title: Text(S.of(context).checkout)),
       body: BlocBuilder<CartCubit, CartState>(
         builder: (context, state) => ModalProgressHUD(
-          inAsyncCall: (state is AddItemsToCartLoading),
-          dismissible: state is! AddItemsToCartLoading,
+          inAsyncCall: state is AddItemsToCartLoading || state is AddItemsToCartError,
+          dismissible: state is! AddItemsToCartLoading && state is! AddItemsToCartError,
           opacity: 0.4,
-          // يعطي ظل خفيف وشيك
           progressIndicator: loadingWidget(context),
-
           child: CustomScrollView(
             slivers: [
               SliverToBoxAdapter(
@@ -93,7 +107,7 @@ class _ChickOutViewState extends State<ChickOutView> {
                   name: widget.name,
                   phone: widget.phone,
                   address: widget.address,
-                  deliveryPrice: widget.deliveryPrice,
+                  deliveryPrice: widget.payWay == 2?0:widget.deliveryPrice,
                   payWay: widget.payWay,
                 ),
               ),
@@ -105,67 +119,146 @@ class _ChickOutViewState extends State<ChickOutView> {
         padding: const EdgeInsets.all(8.0),
         child: CustomButton(
           onPressed: () async {
+            // Group items by store
+            final storeItems = _groupItemsByStore();
+            final orderNumbers = <String>[];
+
             if (widget.payWay == 1) {
+              // Online payment: Pay only for cart total (excluding delivery)
               Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (context) => PaymentView(
                     onPaymentSuccess: () async {
-                     String number =   await context.read<CartCubit>().addProductToCart(
+                      // Create an order for each store
+                      final storeItems = _groupItemsByStore();
+                      final deliveryPerStore = calculateDeliveryPerStore(
                         cart: widget.cart,
-                        name: widget.name,
-                        phone: widget.phone,
-                        address: widget.address,
-                        isPaid: (widget.payWay == 1),
-                        addressUrl: widget.addressUrl,
-                        price: widget.deliveryPrice + widget.cart.total,
+                        userLat: widget.userLat, // TODO: هات إحداثيات المستخدم
+                        userLog: widget.userLog,
                       );
 
-                      context.read<CartCubit>().clearCart(context);
+                      for (var storeId in storeItems.keys) {
+                        final storeCart = CartModel(items: storeItems[storeId]!);
+                        final storeTotal = storeCart.total;
+                        final deliveryForThisStore = deliveryPerStore[storeId] ?? 0;
+
+                        final orderNumber = await context.read<CartCubit>().addProductToCart(
+                          cart: storeCart,
+                          name: widget.name,
+                          phone: widget.phone,
+                          address: widget.address,
+                          isPaid: widget.payWay == 1,
+                          addressUrl: widget.addressUrl,
+                          price: storeTotal + deliveryForThisStore, // 🟢 توصيل خاص بالمتجر فقط
+                          context: context,
+                          store_id: storeId,
+                        );
+                        context.read<CartCubit>().clearCartForStoreIcCheckout(storeId);
+                        orderNumbers.add(orderNumber);
+                      }
+
+
                       Navigator.pushAndRemoveUntil(
                         context,
                         MaterialPageRoute(
-                          builder: (context) =>  ChickOutSuccess(number: number, date: DateTime.now().toUtc().toString(),)
+                          builder: (context) => ChickOutSuccess(
+                            number: orderNumbers.join(', '), // Combine order numbers
+                            date: DateTime.now().toUtc().toString(),
+                          ),
                         ),
-                        (route) => false, // يمنع أي رجوع
+                            (route) => false,
                       );
                     },
-
                     onPaymentError: () {
                       ShowMessage.showToast(
-                        'حدث خطأ غير متوقع بالرجاء المحاولة لاحقاً...',
+                        S.of(context).errorOccurred('Payment failed'),
+                        backgroundColor: Colors.red,
                       );
                     },
-                    price:
-                        (widget.deliveryPrice +
-                        widget
-                            .cart
-                            .total), // Required: Total price (e.g., 100 for 100 EGP)
+                    price: widget.cart.total, // Only cart total, no delivery
                   ),
                 ),
               );
-            } else {
+            } else if(widget.payWay == 2) {
+              // Cash on delivery: Create orders without payment
+              final storeItems = _groupItemsByStore();
 
-             String number = await context.read<CartCubit>().addProductToCart(
-                cart: widget.cart,
-                name: widget.name,
-                phone: widget.phone,
-                address: widget.address,
-                isPaid: (widget.payWay == 1),
-                addressUrl: widget.addressUrl,
-                price: widget.deliveryPrice + widget.cart.total,
-              );
-              context.read<CartCubit>().clearCart(context);
+
+              for (var storeId in storeItems.keys) {
+                final storeCart = CartModel(items: storeItems[storeId]!);
+                final storeTotal = storeCart.total;
+
+
+                final orderNumber = await context.read<CartCubit>().addProductToLocalCart(
+                  cart: storeCart,
+                  name: widget.name,
+                  phone: widget.phone,
+                  address: widget.address,
+                  isPaid: widget.payWay == 1,
+                  addressUrl: widget.addressUrl,
+                  price: storeTotal + 0, // 🟢 توصيل خاص بالمتجر فقط
+                  context: context,
+                  store_id: storeId,
+                );
+                context.read<CartCubit>().clearCartForStoreIcCheckout(storeId);
+                orderNumbers.add(orderNumber);
+
+              }
+
               Navigator.pushAndRemoveUntil(
                 context,
                 MaterialPageRoute(
-                  builder: (context) =>  ChickOutSuccess(number: number, date: DateTime.now().toUtc().toString(),),
+                  builder: (context) => ChickOutSuccess(
+                    number: orderNumbers.join(', '), // Combine order numbers
+                    date: DateTime.now().toUtc().toString(),
+                  ),
                 ),
-                (route) => false, // يمنع أي رجوع
+                    (route) => false,
+              );
+            }else {
+              // Cash on delivery: Create orders without payment
+              final storeItems = _groupItemsByStore();
+              final deliveryPerStore = calculateDeliveryPerStore(
+                cart: widget.cart,
+                userLat: widget.userLat, // TODO: هات إحداثيات المستخدم
+                userLog: widget.userLog,
+              );
+
+              for (var storeId in storeItems.keys) {
+                final storeCart = CartModel(items: storeItems[storeId]!);
+                final storeTotal = storeCart.total;
+                final deliveryForThisStore = deliveryPerStore[storeId] ?? 0;
+
+                final orderNumber = await context.read<CartCubit>().addProductToCart(
+                  cart: storeCart,
+                  name: widget.name,
+                  phone: widget.phone,
+                  address: widget.address,
+                  isPaid: widget.payWay == 1,
+                  addressUrl: widget.addressUrl,
+                  price: storeTotal + deliveryForThisStore, // 🟢 توصيل خاص بالمتجر فقط
+                  context: context,
+                  store_id: storeId,
+                );
+                context.read<CartCubit>().clearCartForStoreIcCheckout(storeId);
+                orderNumbers.add(orderNumber);
+              }
+
+
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ChickOutSuccess(
+                    number: orderNumbers.join(', '), // Combine order numbers
+                    date: DateTime.now().toUtc().toString(),
+                  ),
+                ),
+                    (route) => false,
               );
             }
           },
-          text: 'تأكيد',
+          text: S.of(context).confirmOrder,
         ),
       ),
     );

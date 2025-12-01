@@ -2,7 +2,6 @@ import 'dart:developer';
 
 import 'package:animated_custom_dropdown/custom_dropdown.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:multi_vendor_e_commerce_app/core/models/user_model.dart';
 import 'package:multi_vendor_e_commerce_app/core/utils/functions/show_message.dart';
@@ -10,7 +9,6 @@ import 'package:multi_vendor_e_commerce_app/core/utils/widgets/custom_button.dar
 import 'package:multi_vendor_e_commerce_app/generated/l10n.dart';
 import 'package:phone_form_field/phone_form_field.dart';
 import 'package:multi_vendor_e_commerce_app/core/utils/widgets/custom_text_field.dart';
-import 'package:multi_vendor_e_commerce_app/Features/auth/presentation/manger/sign_up_cubit/sign_up_cubit.dart';
 import 'package:multi_vendor_e_commerce_app/Features/cart/presentation/views/widgets/map_picker.dart';
 
 import 'package:intl/intl.dart';
@@ -57,7 +55,7 @@ class _ChangePersonalDetailsScreenState extends State<ChangePersonalDetailsScree
           ? dateFormat.format(userModel!.dateOfBirth)
           : "01/01/1990";
       addressController.text = userModel?.address??"عنوان المستخدم"; // استبدل بجلب العنوان
-      locationController.text =userModel!.latitude.toString() + ", " + userModel!.longitude.toString()?? "موقع المستخدم"; // استبدل بجلب الموقع
+      locationController.text ="${userModel!.latitude}, ${userModel.longitude}"?? "موقع المستخدم"; // استبدل بجلب الموقع
       latController.text =  userModel.latitude.toString()??"0.0"; // استبدل بجلب خط العرض
       lngController.text =userModel.longitude.toString()?? "0.0"; // استبدل بجلب خط الطول
       genderController.text =(userModel.is_male?"male":"female") ; // استبدل بجلب الجنس
@@ -95,8 +93,7 @@ class _ChangePersonalDetailsScreenState extends State<ChangePersonalDetailsScree
               onPrimary: Theme.of(context).colorScheme.onPrimary,
               surface: Theme.of(context).colorScheme.surface,
               onSurface: Theme.of(context).colorScheme.onSurface,
-            ),
-            dialogBackgroundColor: Theme.of(context).colorScheme.surface,
+            ), dialogTheme: DialogThemeData(backgroundColor: Theme.of(context).colorScheme.surface),
           ),
           child: child!,
         );
@@ -405,7 +402,7 @@ class _ChangePersonalDetailsScreenState extends State<ChangePersonalDetailsScree
 
                 // زر الحفظ
                 _isLoading
-                    ? CircularProgressIndicator()
+                    ? const CircularProgressIndicator()
                     : CustomButton(
                   onPressed: _saveChanges,
                   text: S.of(context).save_changes,

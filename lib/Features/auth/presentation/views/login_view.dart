@@ -72,13 +72,13 @@ class _LoginViewState extends State<LoginView> {
                       if (key.currentState!.validate()) {
                         await context.read<LoginCubit>().loginUser(
                           email: emailController.text.trim(),
-                          password: passwordController.text.trim(),
+                          password: passwordController.text.trim(), context: context,
                         );
                       }
                     },
-                    googleLoginOnPressed: () async {
-                      await context.read<LoginCubit>().googleLogIn();
-                    },
+                    // googleLoginOnPressed: () async {
+                    //   await context.read<LoginCubit>().googleLogIn();
+                    // },
                   ),
                 ),
               ),

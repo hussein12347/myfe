@@ -13,3 +13,5 @@ final class GetCategoriesError extends CategoryState {
   final String errorMessage;
   GetCategoriesError(this.errorMessage);
 }
+
+

@@ -3,6 +3,8 @@ import 'package:multi_vendor_e_commerce_app/Features/splash/presentation/views/w
 import 'package:multi_vendor_e_commerce_app/generated/assets.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../../../core/models/user_model.dart';
+import '../../../../../core/utils/local_storage_helper.dart';
 import '../../../../auth/presentation/views/login_view.dart';
 import '../../../../home/presentation/views/widgets/nav_bar.dart';
 
@@ -36,16 +38,15 @@ class _SplashBodyState extends State<SplashBody>with SingleTickerProviderStateMi
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
+        child: Stack(
           children: [
-            AspectRatio(
-              aspectRatio: 4 / 3,
-              child: Image.asset(Assets.imagesLogo),
-            ),
+              Image.asset(Theme.of(context).brightness == Brightness.light?
+              Assets.imagesLogo:Assets.imagesLogo2),
 
-            const SizedBox(height: 24),
-            SlidingText(slidingAnimation: slidingAnimation,),
+            Positioned(
+                bottom:0,
+                right: 32,
+                child: SlidingText(slidingAnimation: slidingAnimation,)),
 
           ],
         ),
@@ -68,11 +69,14 @@ class _SplashBodyState extends State<SplashBody>with SingleTickerProviderStateMi
   void navigateToHome() {
     Future.delayed(
       const Duration(seconds: 2),
-          () {
-        if (Supabase.instance.client.auth.currentUser==null) {
-          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => LoginView(),));
+          () async {
+
+        if ((Supabase.instance.client.auth.currentUser)==null) {
+          UserModel?user=await  LocalStorageHelper.getUser();
+
+          (user==null) ? Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const LoginView(),)):Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const NavBar(),));
         }else{
-          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => NavBar(),));
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const NavBar(),));
 
         }
 

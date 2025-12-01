@@ -8,11 +8,16 @@ part 'category_state.dart';
 class CategoryCubit extends Cubit<CategoryState> {
   final HomeRepo repo;
   CategoryCubit(this.repo) : super(CategoryInitial());
-
+List<CategoryModel>categories=[];
   Future<void>getCategories()async{
     emit(GetCategoriesLoading());
    final result = await repo.getCategory();
 
-   result.fold((l) => emit(GetCategoriesError(l.errMessage)), (r) => emit(GetCategoriesSuccess(r)),);
+   result.fold((l) => emit(GetCategoriesError(l.errMessage)), (r) {
+     categories=[];
+     categories.addAll(r);
+     emit(GetCategoriesSuccess(r));
+   },);
   }
+
 }

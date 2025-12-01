@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lottie/lottie.dart';
@@ -75,12 +76,12 @@ class StoresInCartView extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 8.0),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(8),
-            child: Image.network(
-              store.imageUrl ?? '',
+            child: CachedNetworkImage(
+              imageUrl:store.imageUrl ?? '',
               width: 50,
               height: 50,
               fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) => const Icon(Icons.store),
+              errorWidget: (context, error, stackTrace) => const Icon(Icons.store),
             ),
           ),
         ),

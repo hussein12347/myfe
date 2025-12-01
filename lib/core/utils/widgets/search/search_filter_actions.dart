@@ -18,7 +18,7 @@ class ProductFilterActions {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
 
       context: context,
-      shape: RoundedRectangleBorder(
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) {

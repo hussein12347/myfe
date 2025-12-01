@@ -14,7 +14,7 @@ class SizeConfig {
 
 
 
-  static init(BuildContext context) {
+  static void init(BuildContext context) {
 
     height = MediaQuery.sizeOf(context).height;
 

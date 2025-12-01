@@ -35,7 +35,9 @@ class _CategorySuggestionsState extends State<CategorySuggestions> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 40,
+
+
+      height: 60,
       margin: const EdgeInsets.symmetric(vertical: 4),
       child: ListView.builder(
         padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -90,8 +92,8 @@ class _CategorySuggestionsState extends State<CategorySuggestions> {
                       borderRadius: BorderRadius.circular(12),
                       child: CachedNetworkImage(
                         imageUrl: category.imageUrl!,
-                        width: 30,
-                        height: 30,
+                        width: 60,
+                        height: 40,
                         fit: BoxFit.cover,
 
                         errorWidget: (context, url, error) => Icon(

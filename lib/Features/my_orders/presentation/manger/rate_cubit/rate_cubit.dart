@@ -1,6 +1,5 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:meta/meta.dart';
 import 'package:multi_vendor_e_commerce_app/Features/my_orders/data/repos/rate_repo/rete_repo.dart';
 
 part 'rate_state.dart';
