@@ -356,7 +356,7 @@ class _NavBarState extends State<NavBar> {
             context,
             MaterialPageRoute(builder: (_) => const MaintenanceView()),
           );
-        } else if (latest.version != currentVersion) {
+        } else if (latest.isHaveUpdate) {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(

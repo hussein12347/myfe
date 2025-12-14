@@ -4,40 +4,44 @@ import 'package:meta/meta.dart';
 class UpdateModel {
   final String id;
   final DateTime createdAt;
-  final String version;
+  final bool isHaveUpdate;
   final String downloadUrl;
+  final String version;
   final bool isUnderMaintenance; // الجديد
 
   const UpdateModel({
     required this.id,
     required this.createdAt,
-    required this.version,
+    required this.isHaveUpdate,
     required this.downloadUrl,
+    required this.version,
     required this.isUnderMaintenance,
   });
 
   UpdateModel copyWith({
     String? id,
     DateTime? createdAt,
-    String? version,
+    bool? isHaveUpdate,
     String? downloadUrl,
     bool? isUnderMaintenance,
   }) {
     return UpdateModel(
       id: id ?? this.id,
       createdAt: createdAt ?? this.createdAt,
-      version: version ?? this.version,
+      isHaveUpdate: isHaveUpdate ?? this.isHaveUpdate,
       downloadUrl: downloadUrl ?? this.downloadUrl,
+      version: version ?? this.version,
       isUnderMaintenance: isUnderMaintenance ?? this.isUnderMaintenance,
     );
   }
 
-  factory UpdateModel.fromJson(Map<String, dynamic> json) {
+  factory UpdateModel.fromJson(Map<String, dynamic> json,{required bool isHaveUpdate,required String downloadUrl,}) {
     return UpdateModel(
       id: json['id'] as String,
       createdAt: DateTime.parse(json['created_at'] as String),
+      isHaveUpdate: isHaveUpdate,
+      downloadUrl: downloadUrl,
       version: json['ios_version'] as String,
-      downloadUrl: json['ios_download_url'] as String,
       isUnderMaintenance: json['ios_is_under_maintenance'] as bool, // الجديد
     );
   }
@@ -46,15 +50,16 @@ class UpdateModel {
     return {
       'id': id,
       'created_at': createdAt.toUtc().toIso8601String(),
-      'ios_version': version,
+      'ios_isHaveUpdate': isHaveUpdate,
       'ios_download_url': downloadUrl,
+      'version': version,
       'ios_is_under_maintenance': isUnderMaintenance, // الجديد
     };
   }
 
   @override
   String toString() {
-    return 'UpdateModel(id: $id, createdAt: $createdAt, version: $version, downloadUrl: $downloadUrl, isUnderMaintenance: $isUnderMaintenance)';
+    return 'UpdateModel(id: $id, createdAt: $createdAt, isHaveUpdate: $isHaveUpdate, downloadUrl: $downloadUrl, isUnderMaintenance: $isUnderMaintenance)';
   }
 
   @override
@@ -63,11 +68,12 @@ class UpdateModel {
     return other is UpdateModel &&
         other.id == id &&
         other.createdAt == createdAt &&
-        other.version == version &&
+        other.isHaveUpdate == isHaveUpdate &&
         other.downloadUrl == downloadUrl &&
+        other.version == version &&
         other.isUnderMaintenance == isUnderMaintenance;
   }
 
   @override
-  int get hashCode => Object.hash(id, createdAt, version, downloadUrl, isUnderMaintenance);
+  int get hashCode => Object.hash(id, createdAt, isHaveUpdate, downloadUrl, version, isUnderMaintenance);
 }

@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -22,7 +24,10 @@ class LoginCubit extends Cubit<LoginState> {
     final result = await authRepo.login(email: email, password: password, context: context);
 
     result.fold(
-          (failure) => emit(LoginError(failure.errMessage)),
+          (failure) {
+            emit(LoginError(failure.errMessage));
+            log(failure.errMessage);
+          },
           (user) => emit(LoginSuccess(user)),
     );
   }
