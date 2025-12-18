@@ -54,8 +54,9 @@ class UpdateRepoImpl implements UpdateRepo {
         id: apiData['id'] as String,
         createdAt: DateTime.parse(apiData['created_at'] as String),
 
-        isHaveUpdate: isUpdateAvailable, // نستخدم المتغير المحسن
-
+   
+        isHaveUpdate: false,
+        // isHaveUpdate: isUpdateAvailable,
         version: finalVersion,
         downloadUrl: finalDownloadUrl,
         isUnderMaintenance: apiData['ios_is_under_maintenance'] as bool,
